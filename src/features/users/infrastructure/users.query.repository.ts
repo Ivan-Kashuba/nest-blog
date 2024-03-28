@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { TUserDocument, TUserModel, User } from '../domain/user.entity';
-import { TUserDbModel } from '../domain/user.type';
 import { PaginationPayload } from '../../../common/pagination/types/pagination.types';
 import { InjectModel } from '@nestjs/mongoose';
 import { PaginationService } from '../../../common/pagination/service/pagination.service';
@@ -43,7 +42,7 @@ export class UsersQueryRepository {
 
     const totalCount = await this.UserModel.countDocuments(filters);
 
-    const foundedUsers: TUserDbModel[] = await this.UserModel.find(filters)
+    const foundedUsers: User[] = await this.UserModel.find(filters)
       .sort({
         [`accountData.${sortBy}`]:
           this.paginationService.getSortDirectionMongoValue(sortDirection),
@@ -59,7 +58,7 @@ export class UsersQueryRepository {
     );
   }
 
-  _mapDbUserToViewUser(dbUser: TUserDbModel | TUserDocument) {
+  _mapDbUserToViewUser(dbUser: User | TUserDocument) {
     const viewUser: UserOutputModel = {
       id: dbUser._id!.toString(),
       createdAt: dbUser.accountData.createdAt,
@@ -70,7 +69,7 @@ export class UsersQueryRepository {
     return viewUser;
   }
 
-  _mapDbUsersToViewUsers(dbUsers: TUserDbModel[]) {
+  _mapDbUsersToViewUsers(dbUsers: User[]) {
     return dbUsers.map(this._mapDbUserToViewUser);
   }
 }

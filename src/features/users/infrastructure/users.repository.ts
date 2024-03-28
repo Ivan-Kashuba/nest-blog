@@ -15,15 +15,17 @@ export class UsersRepository {
     }).lean();
   }
 
-  async findUserById(userId: string) {
+  async findUserById(userId: string): Promise<TUserModel | null> {
     return this.UserModel.findOne({ id: userId });
+  }
+
+  async deleteUser(userId: string) {
+    const deletedResponse = await this.UserModel.deleteOne({ _id: userId });
+
+    return deletedResponse.deletedCount === 1;
   }
 
   async save(user: TUserDocument) {
     await user.save();
-  }
-
-  deleteUser(userId: string) {
-    return 'Hello World! ' + userId;
   }
 }

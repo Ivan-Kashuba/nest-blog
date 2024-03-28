@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  NotFoundException,
   Param,
   Post,
   Query,
@@ -20,6 +22,7 @@ import {
   UserOutputModel,
   UserOutputModelMapper,
 } from './models/output/user.output.model';
+import { ValidateObjectIdPipe } from '../../../common/pipes/object-id.pipe';
 
 @Controller('users')
 export class UsersController {
@@ -58,7 +61,12 @@ export class UsersController {
   }
 
   @Delete(':id')
-  deleteUser(@Param('id') id: string): string {
-    return this.usersService.deleteUser(id);
+  @HttpCode(204)
+  async deleteUser(@Param('id', ValidateObjectIdPipe) id: string) {
+    const isUserDeleted = await this.usersService.deleteUser(id);
+
+    if (!isUserDeleted) {
+      throw new NotFoundException();
+    }
   }
 }

@@ -1,5 +1,4 @@
-import { TUserDocument } from '../../../domain/user.entity';
-import { TUserDbModel } from '../../../domain/user.type';
+import { TUserDocument, User } from '../../../domain/user.entity';
 
 export class UserOutputModel {
   id: string;
@@ -10,7 +9,7 @@ export class UserOutputModel {
 
 // MAPPERS
 export const UserOutputModelMapper = (
-  user: TUserDbModel | TUserDocument,
+  user: User | TUserDocument,
 ): UserOutputModel => {
   const outputModel = new UserOutputModel();
 

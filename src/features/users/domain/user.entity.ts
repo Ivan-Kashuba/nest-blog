@@ -1,17 +1,11 @@
 import { HydratedDocument, Model, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import {
-  TUserAccountConfirmation,
-  TUserAccountData,
-  TUserDbModel,
-  TUserPasswordRecovery,
-} from './user.type';
 import { UserCreateModel } from '../api/models/input/create-user.input.model';
 import bcrypt from 'bcrypt';
 import { UsersRepository } from '../infrastructure/users.repository';
 
 @Schema({ _id: false })
-class UserAccountData {
+export class UserAccountData {
   @Prop({ required: true, type: String })
   login: string;
   @Prop({ required: true, type: String })
@@ -25,7 +19,7 @@ class UserAccountData {
 }
 
 @Schema({ _id: false })
-class UserAccountConfirmation {
+export class UserAccountConfirmation {
   @Prop({ type: String || null })
   confirmationCode: string | null;
   @Prop({ type: String || null })
@@ -35,7 +29,7 @@ class UserAccountConfirmation {
 }
 
 @Schema({ _id: false })
-class UserPasswordRecovery {
+export class UserPasswordRecovery {
   @Prop({ type: String || null })
   confirmationCode: string | null;
   @Prop({ type: String || null })
@@ -46,11 +40,11 @@ class UserPasswordRecovery {
 export class User {
   _id: Types.ObjectId;
   @Prop(UserAccountData)
-  accountData: TUserAccountData;
+  accountData: UserAccountData;
   @Prop(UserAccountConfirmation)
-  accountConfirmation: TUserAccountConfirmation;
+  accountConfirmation: UserAccountConfirmation;
   @Prop(UserPasswordRecovery)
-  passwordRecovery: TUserPasswordRecovery;
+  passwordRecovery: UserPasswordRecovery;
 
   static async createUser(
     UserModel: TUserModel,
@@ -69,7 +63,8 @@ export class User {
       return null;
     }
 
-    const userToSave: TUserDbModel = {
+    const userToSave: User = {
+      _id: new Types.ObjectId(),
       accountData: {
         login,
         email,
