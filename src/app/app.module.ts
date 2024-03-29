@@ -30,10 +30,15 @@ import {
 } from '../features/likes/domain/ExtendedLikes.entity';
 import { CommentsController } from '../features/comments/api/comments.contoller';
 import { PostsQueryRepository } from '../features/posts/infrastructure/posts.query.repository';
+import { ConfigModule } from '@nestjs/config';
+import { envConfig } from '../config/env-config';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://127.0.0.1:27017', { dbName: 'local-db' }),
+    ConfigModule.forRoot(),
+    MongooseModule.forRoot(envConfig.MONGO_URI, {
+      dbName: envConfig.DB_NAME,
+    }),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
