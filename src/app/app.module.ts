@@ -5,7 +5,7 @@ import { UsersController } from '../features/users/api/users.contoller';
 import { UsersService } from '../features/users/application/users.service';
 import { UsersRepository } from '../features/users/infrastructure/users.repository';
 import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from '../features/users/domain/user.entity';
+import { User, UserSchema } from '../features/users/domain/User.entity';
 import { UsersQueryRepository } from '../features/users/infrastructure/users.query.repository';
 import { PaginationService } from '../common/pagination/service/pagination.service';
 import { TestingController } from '../features/testing/api/testing.controller';

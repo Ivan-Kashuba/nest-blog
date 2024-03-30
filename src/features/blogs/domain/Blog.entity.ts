@@ -1,17 +1,16 @@
 import { HydratedDocument, Model, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-@Schema()
+@Schema({ timestamps: { createdAt: true } })
 export class Blog {
   _id: Types.ObjectId;
+  createdAt: string;
   @Prop({ required: true })
   name: string;
   @Prop({ required: true })
   description: string;
   @Prop({ required: true })
   websiteUrl: string;
-  @Prop({ default: new Date().toISOString() })
-  createdAt: string;
   @Prop({ default: false })
   isMembership: boolean;
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { TUserDocument, TUserModel, User } from '../domain/user.entity';
+import { TUserDocument, TUserModel, User } from '../domain/User.entity';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()

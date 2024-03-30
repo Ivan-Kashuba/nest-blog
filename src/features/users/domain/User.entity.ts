@@ -4,14 +4,13 @@ import { UserCreateModel } from '../api/models/input/create-user.input.model';
 import bcrypt from 'bcrypt';
 import { UsersRepository } from '../infrastructure/users.repository';
 
-@Schema({ _id: false })
+@Schema({ _id: false, timestamps: { createdAt: true } })
 export class UserAccountData {
+  createdAt: string;
   @Prop({ required: true, type: String })
   login: string;
   @Prop({ required: true, type: String })
   email: string;
-  @Prop({ default: new Date().toISOString, type: String })
-  createdAt: string;
   @Prop({ required: true, type: String })
   salt: string;
   @Prop({ required: true, type: String })

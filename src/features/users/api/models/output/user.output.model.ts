@@ -1,4 +1,4 @@
-import { TUserDocument, User } from '../../../domain/user.entity';
+import { TUserDocument, User } from '../../../domain/User.entity';
 
 export class UserOutputModel {
   id: string;

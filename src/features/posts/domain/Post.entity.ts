@@ -5,17 +5,16 @@ import {
   ExtendedLikesSchema,
 } from '../../likes/domain/ExtendedLikes.entity';
 
-@Schema()
+@Schema({ timestamps: { createdAt: true } })
 export class Post {
   _id: Types.ObjectId;
+  createdAt: string;
   @Prop({ required: true })
   title: string;
   @Prop({ required: true })
   shortDescription: string;
   @Prop({ required: true })
   blogId: Types.ObjectId;
-  @Prop({ default: new Date().toISOString() })
-  createdAt: string;
   @Prop({ required: true })
   content: string;
   @Prop({ type: [ExtendedLikesSchema] })

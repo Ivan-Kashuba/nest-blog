@@ -17,7 +17,7 @@ import {
 } from '../../../common/pagination/types/pagination.types';
 import { PaginationService } from '../../../common/pagination/service/pagination.service';
 import { UserCreateModel } from './models/input/create-user.input.model';
-import { TUserDocument } from '../domain/user.entity';
+import { TUserDocument } from '../domain/User.entity';
 import {
   UserOutputModel,
   UserOutputModelMapper,

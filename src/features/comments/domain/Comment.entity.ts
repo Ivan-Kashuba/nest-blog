@@ -11,17 +11,16 @@ export class CommentatorInfo {
   userLogin: string;
 }
 
-@Schema()
+@Schema({ timestamps: { createdAt: true } })
 export class Comment {
   _id: Types.ObjectId;
+  createdAt: string;
   @Prop({ required: true })
   postId: Types.ObjectId;
   @Prop({ required: true })
   content: string;
   @Prop({ required: true, type: CommentatorInfo })
   commentatorInfo: TCommentatorInfo;
-  @Prop({ default: new Date().toISOString() })
-  createdAt: string;
   @Prop({ type: [Like] })
   likes: Like[];
 }
