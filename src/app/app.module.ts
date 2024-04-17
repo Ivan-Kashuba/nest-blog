@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersController } from '../features/users/api/users.contoller';
@@ -7,7 +7,7 @@ import { UsersRepository } from '../features/users/infrastructure/users.reposito
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from '../features/users/domain/User.entity';
 import { UsersQueryRepository } from '../features/users/infrastructure/users.query.repository';
-import { PaginationService } from '../common/pagination/service/pagination.service';
+import { PaginationService } from '../infrastructure/pagination/service/pagination.service';
 import { TestingController } from '../features/testing/api/testing.controller';
 import { BlogsController } from '../features/blogs/api/blogs.contoller';
 import { Blog, BlogSchema } from '../features/blogs/domain/Blog.entity';
@@ -30,22 +30,51 @@ import {
 } from '../features/likes/domain/ExtendedLikes.entity';
 import { CommentsController } from '../features/comments/api/comments.contoller';
 import { PostsQueryRepository } from '../features/posts/infrastructure/posts.query.repository';
-import { ConfigModule } from '@nestjs/config';
-import { envConfig } from '../config/env-config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import config, { envConfig, EnvVariables } from '../config/env-config';
+import { UserLoginOrEmailUnusedConstraint } from '../infrastructure/decorators/validation/is-user-login-available';
+import { AuthController } from '../features/auth/api/auth.contoller';
+import { JwtService } from '../application/jwt.service';
+import { AuthService } from '../features/auth/application/auth.service';
+import { Session, SessionSchema } from '../features/auth/domain/Session.entity';
+import { AuthRepository } from '../features/auth/infrastructure/auth.repository';
+import { UserInfoFromTokenIfExists } from '../infrastructure/middlewares/get-info-from-token-if-exists';
+import { EmailManager } from '../adapters/email.manager';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      load: [config],
+    }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule], // Make sure ConfigService is available
+      inject: [ConfigService], // Inject ConfigService to use it in factory
+      useFactory: (config: ConfigService) => ({
+        defaults: {
+          from: 'Blog <blog.kashuba.sender@gmail.com>',
+          subject: 'Blog operation',
+        },
+        transport: {
+          service: 'gmail',
+          auth: {
+            user: 'blog.kashuba.sender@gmail.com',
+            pass: config.get(EnvVariables.EMAIL_SENDER_PASSWORD),
+          },
+        },
+      }),
+    }),
     MongooseModule.forRoot(envConfig.MONGO_URI, {
       dbName: envConfig.DB_NAME,
     }),
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
-    MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
-    MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
-    MongooseModule.forFeature([{ name: Like.name, schema: LikeSchema }]),
     MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: Blog.name, schema: BlogSchema },
+      { name: Post.name, schema: PostSchema },
+      { name: Comment.name, schema: CommentSchema },
+      { name: Like.name, schema: LikeSchema },
       { name: ExtendedLikes.name, schema: ExtendedLikesSchema },
+      { name: Session.name, schema: SessionSchema },
     ]),
   ],
   controllers: [
@@ -55,8 +84,11 @@ import { envConfig } from '../config/env-config';
     BlogsController,
     PostsController,
     CommentsController,
+    AuthController,
   ],
   providers: [
+    JwtService,
+    EmailManager,
     AppService,
     PaginationService,
     UsersService,
@@ -69,6 +101,13 @@ import { envConfig } from '../config/env-config';
     PostsRepository,
     PostsQueryRepository,
     CommentsQueryRepository,
+    UserLoginOrEmailUnusedConstraint,
+    AuthService,
+    AuthRepository,
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(UserInfoFromTokenIfExists).forRoutes('*');
+  }
+}

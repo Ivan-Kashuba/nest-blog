@@ -4,22 +4,18 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpStatus,
   NotFoundException,
   Param,
   Post,
   Put,
   Query,
 } from '@nestjs/common';
-import {
-  PaginationPayload,
-  WithPagination,
-} from '../../../common/pagination/types/pagination.types';
-import { PaginationService } from '../../../common/pagination/service/pagination.service';
 
 import { CommentsQueryRepository } from '../../comments/infrastructure/comments.query.repository';
 
 import { PostsService } from '../application/posts.service';
-import { ValidateObjectIdPipe } from '../../../common/pipes/object-id.pipe';
+
 import { PostInputModel } from './models/input/create-post.input.model';
 import { Types } from 'mongoose';
 
@@ -28,6 +24,13 @@ import { TPostDocument } from '../domain/Post.entity';
 import { PostsQueryRepository } from '../infrastructure/posts.query.repository';
 import { PostOutputModel } from './models/output/post.output.model';
 import { CommentOutputModel } from '../../comments/api/models/output/comment.output.model';
+import { PaginationService } from '../../../infrastructure/pagination/service/pagination.service';
+import {
+  PaginationPayload,
+  WithPagination,
+} from '../../../infrastructure/pagination/types/pagination.types';
+import { ValidateObjectIdPipe } from '../../../infrastructure/pipes/object-id.pipe';
+import { User } from '../../../infrastructure/decorators/transform/get-user';
 
 @Controller('posts')
 export class PostsController {
@@ -45,6 +48,7 @@ export class PostsController {
     queryParams: { title?: string } & Partial<
       PaginationPayload<PostOutputModel>
     >,
+    @User('userId') userId: Types.ObjectId,
   ): Promise<WithPagination<PostOutputModel>> {
     const titleToFind = queryParams?.title || null;
     const pagination: PaginationPayload<PostOutputModel> =
@@ -53,7 +57,11 @@ export class PostsController {
         'createdAt',
       );
 
-    return await this.postsQueryRepository.findPosts(titleToFind, pagination);
+    return await this.postsQueryRepository.findPosts(
+      titleToFind,
+      pagination,
+      userId,
+    );
   }
 
   @Post()
@@ -71,8 +79,12 @@ export class PostsController {
   @Get(':postId')
   async getPost(
     @Param('postId', ValidateObjectIdPipe) postId: Types.ObjectId,
+    @User('userId') userId: Types.ObjectId,
   ): Promise<PostOutputModel> {
-    const foundedPost = await this.postsQueryRepository.findPostById(postId);
+    const foundedPost = await this.postsQueryRepository.findPostById(
+      postId,
+      userId,
+    );
 
     if (!foundedPost) {
       throw new NotFoundException();
@@ -85,6 +97,7 @@ export class PostsController {
   async getPostComments(
     @Query() queryParams: Partial<PaginationPayload<CommentOutputModel>>,
     @Param('postId', ValidateObjectIdPipe) postId: Types.ObjectId,
+    @User('userId') userId: Types.ObjectId,
   ): Promise<WithPagination<CommentOutputModel>> {
     const pagination: PaginationPayload<CommentOutputModel> =
       this.paginationService.validatePayloadPagination(
@@ -102,11 +115,12 @@ export class PostsController {
     return await this.commentsQueryRepository.findCommentsByPostId(
       postId,
       pagination,
+      userId,
     );
   }
 
   @Delete(':postId')
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async deletePost(
     @Param('postId', ValidateObjectIdPipe) postId: Types.ObjectId,
   ) {
@@ -118,7 +132,7 @@ export class PostsController {
   }
 
   @Put(':postId')
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(
     @Param('postId', ValidateObjectIdPipe) postId: Types.ObjectId,
     @Body() updateInfo: PostInputModel,

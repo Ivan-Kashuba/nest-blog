@@ -59,7 +59,7 @@ export class User {
     const isEmailExists = await usersRepository.findUserByLoginOrEmail(email);
 
     if (isLoginExists || isEmailExists) {
-      return null;
+      throw new Error('User credentials are already in use');
     }
 
     const userToSave: User = {

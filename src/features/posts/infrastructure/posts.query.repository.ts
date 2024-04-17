@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import {
   PaginationPayload,
   WithPagination,
-} from '../../../common/pagination/types/pagination.types';
+} from '../../../infrastructure/pagination/types/pagination.types';
 import { InjectModel } from '@nestjs/mongoose';
-import { PaginationService } from '../../../common/pagination/service/pagination.service';
+import { PaginationService } from '../../../infrastructure/pagination/service/pagination.service';
 import { NewestLikeViewModel } from '../../likes/api/models/output/extended-like.input.model';
 import { LIKE_STATUS } from '../../likes/domain/like.type';
 import { PipelineStage, Types } from 'mongoose';

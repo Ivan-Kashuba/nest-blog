@@ -1,5 +1,5 @@
 import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
-import { ValidateObjectIdPipe } from '../../../common/pipes/object-id.pipe';
+import { ValidateObjectIdPipe } from '../../../infrastructure/pipes/object-id.pipe';
 import { Types } from 'mongoose';
 import { CommentsQueryRepository } from '../infrastructure/comments.query.repository';
 import { CommentOutputModel } from './models/output/comment.output.model';

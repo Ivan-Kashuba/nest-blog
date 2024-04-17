@@ -3,9 +3,9 @@ import { Blog, TBlogModel } from '../domain/Blog.entity';
 import {
   PaginationPayload,
   WithPagination,
-} from '../../../common/pagination/types/pagination.types';
+} from '../../../infrastructure/pagination/types/pagination.types';
 import { InjectModel } from '@nestjs/mongoose';
-import { PaginationService } from '../../../common/pagination/service/pagination.service';
+import { PaginationService } from '../../../infrastructure/pagination/service/pagination.service';
 import {
   BlogOutputModel,
   BlogOutputModelMapper,

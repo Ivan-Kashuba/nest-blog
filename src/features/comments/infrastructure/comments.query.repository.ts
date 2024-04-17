@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { PaginationService } from '../../../common/pagination/service/pagination.service';
+import { PaginationService } from '../../../infrastructure/pagination/service/pagination.service';
 import { LIKE_STATUS } from '../../likes/domain/like.type';
 import { Types } from 'mongoose';
 import { Comment, TCommentModel } from '../domain/Comment.entity';
-import { PaginationPayload } from '../../../common/pagination/types/pagination.types';
+import { PaginationPayload } from '../../../infrastructure/pagination/types/pagination.types';
 
 import { CommentOutputModel } from '../api/models/output/comment.output.model';
 

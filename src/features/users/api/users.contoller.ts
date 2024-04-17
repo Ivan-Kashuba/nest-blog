@@ -4,26 +4,29 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpStatus,
   NotFoundException,
   Param,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from '../application/users.service';
 import { UsersQueryRepository } from '../infrastructure/users.query.repository';
 import {
   PaginationPayload,
   WithPagination,
-} from '../../../common/pagination/types/pagination.types';
-import { PaginationService } from '../../../common/pagination/service/pagination.service';
+} from '../../../infrastructure/pagination/types/pagination.types';
+import { PaginationService } from '../../../infrastructure/pagination/service/pagination.service';
 import { UserCreateModel } from './models/input/create-user.input.model';
 import { TUserDocument } from '../domain/User.entity';
 import {
   UserOutputModel,
   UserOutputModelMapper,
 } from './models/output/user.output.model';
-import { ValidateObjectIdPipe } from '../../../common/pipes/object-id.pipe';
-
+import { ValidateObjectIdPipe } from '../../../infrastructure/pipes/object-id.pipe';
+import { AdminAuthGuard } from '../../../infrastructure/guards/admin-auth.guard';
+@UseGuards(AdminAuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(
@@ -61,7 +64,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async deleteUser(@Param('id', ValidateObjectIdPipe) id: string) {
     const isUserDeleted = await this.usersService.deleteUser(id);
 

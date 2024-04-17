@@ -4,17 +4,19 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpStatus,
   NotFoundException,
   Param,
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   PaginationPayload,
   WithPagination,
-} from '../../../common/pagination/types/pagination.types';
-import { PaginationService } from '../../../common/pagination/service/pagination.service';
+} from '../../../infrastructure/pagination/types/pagination.types';
+import { PaginationService } from '../../../infrastructure/pagination/service/pagination.service';
 import {
   BlogOutputModel,
   BlogOutputModelMapper,
@@ -22,7 +24,7 @@ import {
 import { BlogsQueryRepository } from '../infrastructure/blogs.query.repository';
 import { BlogInputModel } from './models/input/create-blog.input.model';
 import { BlogsService } from '../application/blogs.service';
-import { ValidateObjectIdPipe } from '../../../common/pipes/object-id.pipe';
+import { ValidateObjectIdPipe } from '../../../infrastructure/pipes/object-id.pipe';
 import { PostInputModel } from '../../posts/api/models/input/create-post.input.model';
 import { PostOutputModel } from '../../posts/api/models/output/post.output.model';
 import { Types } from 'mongoose';
@@ -30,6 +32,9 @@ import { PostsService } from '../../posts/application/posts.service';
 import { BlogsRepository } from '../infrastructure/blogs.repository';
 import { PostsQueryRepository } from '../../posts/infrastructure/posts.query.repository';
 import { Blog } from '../domain/Blog.entity';
+import { UserAuthGuard } from '../../../infrastructure/guards/user-auth.guard';
+import { User } from '../../../infrastructure/decorators/transform/get-user';
+import { UserTokenInfo } from '../../auth/types/auth.types';
 
 @Controller('blogs')
 export class BlogsController {
@@ -42,6 +47,7 @@ export class BlogsController {
     private readonly blogsRepository: BlogsRepository,
   ) {}
 
+  @UseGuards(UserAuthGuard)
   @Get()
   async getBlogs(
     @Query()
@@ -125,7 +131,7 @@ export class BlogsController {
   }
 
   @Delete(':blogId')
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('blogId', ValidateObjectIdPipe) blogId: string) {
     const isBlogDeleted = await this.blogsService.deleteBlog(blogId);
 
@@ -135,7 +141,7 @@ export class BlogsController {
   }
 
   @Put(':blogId')
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlog(
     @Param('blogId', ValidateObjectIdPipe) blogId: Types.ObjectId,
     @Body() updateInfo: BlogInputModel,

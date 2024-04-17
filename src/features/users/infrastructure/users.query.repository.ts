@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { TUserDocument, TUserModel, User } from '../domain/User.entity';
-import { PaginationPayload } from '../../../common/pagination/types/pagination.types';
+import { PaginationPayload } from '../../../infrastructure/pagination/types/pagination.types';
 import { InjectModel } from '@nestjs/mongoose';
-import { PaginationService } from '../../../common/pagination/service/pagination.service';
+import { PaginationService } from '../../../infrastructure/pagination/service/pagination.service';
 import { UserOutputModel } from '../api/models/output/user.output.model';
 
 @Injectable()
