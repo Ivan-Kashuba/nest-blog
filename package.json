@@ -25,7 +25,6 @@
     "@nestjs/core": "^10.0.0",
     "@nestjs/mongoose": "^10.0.4",
     "@nestjs/platform-express": "^10.0.0",
-    "@types/bcrypt": "^5.0.2",
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
@@ -38,6 +37,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@nestjs/cli": "^10.0.0",
     "@nestjs/config": "^3.2.1",
     "@nestjs/schematics": "^10.0.0",
