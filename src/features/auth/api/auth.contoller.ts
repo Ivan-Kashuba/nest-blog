@@ -16,6 +16,7 @@ import { AuthService } from '../application/auth.service';
 import { Request, Response } from 'express';
 import { UserCreateModel } from '../../users/api/models/input/create-user.input.model';
 import { EmailManager } from '../../../adapters/email.manager';
+import { EmailResendingInputModel } from './models/input/email-resending.input.model';
 
 @Controller('auth')
 export class AuthController {
@@ -64,5 +65,10 @@ export class AuthController {
     if (!createdUserId) {
       throw new UnauthorizedException();
     }
+  }
+  @Post('registration-email-resending')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async resendRegistrationEmail(@Body() { email }: EmailResendingInputModel) {
+    console.log('email:', email);
   }
 }

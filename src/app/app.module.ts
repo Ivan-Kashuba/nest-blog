@@ -32,7 +32,7 @@ import { CommentsController } from '../features/comments/api/comments.contoller'
 import { PostsQueryRepository } from '../features/posts/infrastructure/posts.query.repository';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import config, { envConfig, EnvVariables } from '../config/env-config';
-import { UserLoginOrEmailUnusedConstraint } from '../infrastructure/decorators/validation/is-user-login-available';
+import { UserLoginOrEmailExistsConstraint } from '../infrastructure/decorators/validation/is-user-login-available';
 import { AuthController } from '../features/auth/api/auth.contoller';
 import { JwtService } from '../application/jwt.service';
 import { AuthService } from '../features/auth/application/auth.service';
@@ -101,7 +101,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
     PostsRepository,
     PostsQueryRepository,
     CommentsQueryRepository,
-    UserLoginOrEmailUnusedConstraint,
+    UserLoginOrEmailExistsConstraint,
     AuthService,
     AuthRepository,
   ],

@@ -1,13 +1,13 @@
 import { Length } from 'class-validator';
 import {
-  IsLoginValid,
-  isUserEmailValid,
+  LoginValid,
+  UserEmailValid,
 } from '../../../../../infrastructure/decorators/validation/user-login';
 
 export class UserCreateModel {
-  @IsLoginValid()
+  @LoginValid(false)
   login: string;
-  @isUserEmailValid()
+  @UserEmailValid(false)
   email: string;
   @Length(6, 20)
   password: string;

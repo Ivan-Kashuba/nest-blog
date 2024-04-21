@@ -11,15 +11,17 @@ import { UsersRepository } from '../../../features/users/infrastructure/users.re
 
 @ValidatorConstraint({ name: 'IsUserLoginOrEmailUnused', async: true })
 @Injectable()
-export class UserLoginOrEmailUnusedConstraint
+export class UserLoginOrEmailExistsConstraint
   implements ValidatorConstraintInterface
 {
   constructor(private readonly usersRepository: UsersRepository) {}
-  async validate(value: any, args: ValidationArguments) {
+  async validate(value: string, args: ValidationArguments) {
+    const shouldExist = args.constraints[0];
+
     const isValueOccupied =
       await this.usersRepository.findUserByLoginOrEmail(value);
 
-    return !isValueOccupied;
+    return shouldExist ? !!isValueOccupied : !isValueOccupied;
   }
 
   defaultMessage(validationArguments?: ValidationArguments): string {
@@ -28,8 +30,8 @@ export class UserLoginOrEmailUnusedConstraint
 }
 
 // https://github.com/typestack/class-validator?tab=readme-ov-file#custom-validation-decorators
-export function IsUserLoginOrEmailUnused(
-  property?: string,
+export function UserLoginOrEmailExists(
+  shouldExist: boolean,
   validationOptions?: ValidationOptions,
 ) {
   return function (object: Object, propertyName: string) {
@@ -37,8 +39,8 @@ export function IsUserLoginOrEmailUnused(
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
-      constraints: [property],
-      validator: UserLoginOrEmailUnusedConstraint,
+      constraints: [shouldExist],
+      validator: UserLoginOrEmailExistsConstraint,
     });
   };
 }
