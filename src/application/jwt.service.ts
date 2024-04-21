@@ -1,6 +1,6 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { MILLI_SECONDS_IN_SECOND } from '../shared/constants';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { Injectable } from '@nestjs/common';
 import { envConfig } from '../config/env-config';
 import { UserTokenInfo } from '../features/auth/types/auth.types';
