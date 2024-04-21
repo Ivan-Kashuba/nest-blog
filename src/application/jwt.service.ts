@@ -1,6 +1,6 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { MILLI_SECONDS_IN_SECOND } from '../shared/constants';
-// import * as bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt';
 import { Injectable } from '@nestjs/common';
 import { envConfig } from '../config/env-config';
 import { UserTokenInfo } from '../features/auth/types/auth.types';
@@ -54,12 +54,10 @@ export class JwtService {
   }
 
   createSalt(rounds: number) {
-    // return bcrypt.genSaltSync(rounds);
-    return '12312312';
+    return bcrypt.genSaltSync(rounds);
   }
 
   createHash(data: string, salt: string) {
-    // return bcrypt.hashSync(data, salt);
-    return `qsdqsdq${data}wdfdwf${salt}`;
+    return bcrypt.hashSync(data, salt);
   }
 }
