@@ -1,7 +1,7 @@
 import { HydratedDocument, Model, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { UserCreateModel } from '../api/models/input/create-user.input.model';
-import * as bcrypt from 'bcrypt';
+// import * as bcrypt from 'bcrypt';
 import { UsersRepository } from '../infrastructure/users.repository';
 
 @Schema({ _id: false, timestamps: { createdAt: true } })
@@ -52,8 +52,11 @@ export class User {
   ): Promise<TUserDocument | null> {
     const { login, password, email } = userPayload;
 
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(password, salt);
+    // const salt = bcrypt.genSaltSync(10);
+    // const hash = bcrypt.hashSync(password, salt);
+
+    const salt = 'wdfwdfwdfwdfwdf';
+    const hash = `wdfwdfwdf${password}wdfwdfwdf`;
 
     const isLoginExists = await usersRepository.findUserByLoginOrEmail(login);
     const isEmailExists = await usersRepository.findUserByLoginOrEmail(email);
