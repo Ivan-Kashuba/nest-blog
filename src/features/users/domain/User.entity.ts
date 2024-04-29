@@ -46,10 +46,10 @@ export class User {
   passwordRecovery: UserPasswordRecovery;
 
   static async createUser(
-    UserModel: TUserModel,
     usersRepository: UsersRepository,
     userPayload: UserCreateModel,
   ): Promise<TUserDocument | null> {
+    const that = this as unknown as TUserModel;
     const { login, password, email } = userPayload;
 
     const salt = bcrypt.genSaltSync(10);
@@ -82,23 +82,18 @@ export class User {
       },
     };
 
-    return new UserModel(userToSave);
+    return new that(userToSave);
   }
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-UserSchema.statics = {
+const UserStaticMethods = {
   createUser: User.createUser,
 };
 
-export type TUserStaticMethods = {
-  createUser: (
-    usersModelClass: TUserModel,
-    usersRepository: UsersRepository,
-    userPayload: UserCreateModel,
-  ) => Promise<TUserDocument>;
-};
+UserSchema.statics = UserStaticMethods;
 
+export type TUserStaticMethods = typeof UserStaticMethods;
 export type TUserDocument = HydratedDocument<User>;
 export type TUserModel = Model<User> & TUserStaticMethods;

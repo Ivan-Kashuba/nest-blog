@@ -1,16 +1,26 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersRepository } from '../../users/infrastructure/users.repository';
 import { JwtService } from '../../../application/jwt.service';
 import { Types } from 'mongoose';
 import { UserTokenInfo } from '../types/auth.types';
 import { LoginInputModel } from '../api/models/input/login.input.model';
 import { AuthRepository } from '../infrastructure/auth.repository';
-import { add } from 'date-fns';
+import { add, isBefore } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
-import { TUserModel, User } from '../../users/domain/User.entity';
+import {
+  TUserDocument,
+  TUserModel,
+  User,
+} from '../../users/domain/User.entity';
 import { UserCreateModel } from '../../users/api/models/input/create-user.input.model';
 import { EmailManager } from '../../../adapters/email.manager';
 import { InjectModel } from '@nestjs/mongoose';
+import { ResultService } from '../../../infrastructure/resultService/ResultService';
 
 @Injectable()
 export class AuthService {
@@ -102,6 +112,183 @@ export class AuthService {
     await this.usersRepository.save(userInDb);
 
     return userInDb._id;
+  }
+
+  async resendRegistrationCode(userEmail: string) {
+    const confirmationCode = uuidv4();
+
+    const user = await this.usersRepository.findUserByLoginOrEmail(userEmail);
+
+    if (!user || user.accountConfirmation.isConfirmed) {
+      throw new NotFoundException();
+    }
+
+    user.accountConfirmation = {
+      confirmationCode,
+      isConfirmed: false,
+      expirationDate: add(new Date(), { hours: 24 }).toISOString(),
+    };
+
+    await this.usersRepository.save(user);
+
+    await this.emailManager.sendRegistrationConfirmEmail(
+      userEmail,
+      confirmationCode,
+    );
+  }
+
+  async confirmRegistrationCode(code: string) {
+    const userToConfirm: TUserDocument | null =
+      await this.usersRepository.findUserByRegistrationActivationCode(code);
+
+    if (!userToConfirm) {
+      throw new BadRequestException(
+        ResultService.createError('code', 'User to confirm is not found'),
+      );
+    }
+
+    await this.usersRepository.updateUserByLoginOrEmail(
+      userToConfirm!.accountData!.email,
+      {
+        'accountConfirmation.isConfirmed': true,
+        'accountConfirmation.confirmationCode': null,
+        'accountConfirmation.expirationDate': null,
+      } as any,
+    );
+  }
+
+  async refreshToken(refreshToken: string) {
+    const user = await this.jwtService.getUserInfoByToken(refreshToken);
+
+    console.log('user:', user);
+
+    if (!user) {
+      return null;
+    }
+
+    const session = await this.getUserSessionByIdAndRefreshToken(
+      user.userId,
+      refreshToken,
+    );
+
+    if (!session) {
+      return null;
+    }
+
+    const newJwtKeysPair = await this.createJwtKeys(user);
+
+    await this.updateUserDeviceSession(
+      session._id,
+      newJwtKeysPair.refreshToken,
+    );
+
+    return newJwtKeysPair;
+  }
+
+  async getUserSessionByIdAndRefreshToken(
+    userId: Types.ObjectId,
+    refreshToken: string,
+  ) {
+    const usersSessions = await this.authRepository.getUserSessionsList(userId);
+
+    const user = await this.jwtService.getUserInfoByToken(refreshToken);
+    const refreshTokenExpirationDate =
+      await this.jwtService.getJwtExpirationDate(refreshToken);
+
+    if (!refreshTokenExpirationDate) return null;
+
+    const session = usersSessions?.find((us) => {
+      return (
+        us?.deviceId.toString() === user?.deviceId.toString() &&
+        refreshTokenExpirationDate === us.lastActiveDate
+      );
+    });
+
+    if (!session) return null;
+
+    return session;
+  }
+
+  async updateUserDeviceSession(
+    sessionId: Types.ObjectId,
+    refreshToken: string,
+  ) {
+    const expirationTokenDate =
+      await this.jwtService.getJwtExpirationDate(refreshToken);
+
+    return await this.authRepository.updateUserDeviceSession(sessionId, {
+      lastActiveDate: expirationTokenDate!,
+    });
+  }
+
+  async logout(userId: Types.ObjectId, refreshToken: string) {
+    const user = await this.jwtService.getUserInfoByToken(refreshToken);
+
+    if (!user) return false;
+
+    const validSession = await this.getUserSessionByIdAndRefreshToken(
+      userId,
+      refreshToken,
+    );
+
+    if (!validSession) return false;
+
+    const isSessionRemoved = await this.authRepository.removeUserSession(
+      validSession._id,
+    );
+
+    return isSessionRemoved;
+  }
+
+  async recoveryPassword(email: string) {
+    const confirmationCode = uuidv4();
+
+    const user = await this.usersRepository.findUserByLoginOrEmail(email);
+
+    if (!user) {
+      return true;
+    }
+
+    await this.emailManager.sendPasswordRecoveryEmail(email, confirmationCode);
+
+    await this.usersRepository.updateUserByLoginOrEmail(email, {
+      passwordRecovery: {
+        confirmationCode,
+        expirationDate: add(new Date(), { hours: 24 }).toISOString(),
+      },
+    });
+  }
+
+  async setNewPasswordForUserByCode(recoveryCode: string, newPassword: string) {
+    const user =
+      await this.usersRepository.findUserByPasswordRecoveryCode(recoveryCode);
+
+    if (!user) return false;
+
+    const expirationDate = user.passwordRecovery.expirationDate;
+
+    if (!expirationDate) return false;
+
+    const isCodeExpired = isBefore(expirationDate, new Date());
+
+    if (isCodeExpired) return false;
+
+    const salt = this.jwtService.createSalt(10);
+
+    await this.usersRepository.updateUserByLoginOrEmail(
+      user.accountData.login,
+      {
+        accountData: {
+          ...user.accountData,
+          salt: salt,
+          hash: this.jwtService.createHash(newPassword, salt),
+        },
+        passwordRecovery: {
+          confirmationCode: null,
+          expirationDate: null,
+        },
+      },
+    );
   }
 
   async createJwtKeys(userInfo: UserTokenInfo) {

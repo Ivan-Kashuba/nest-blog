@@ -16,15 +16,14 @@ export class UsersService {
   async createUser(userPayload: UserCreateModel): Promise<TUserDocument> {
     await validateOrRejectModel(userPayload, UserCreateModel);
 
-    const user: TUserDocument = await this.UserModel.createUser(
-      this.UserModel,
+    const user: TUserDocument | null = await this.UserModel.createUser(
       this.usersRepository,
       userPayload,
     );
 
-    await this.usersRepository.save(user);
+    await this.usersRepository.save(user!);
 
-    return user;
+    return user!;
   }
   deleteUser(id: string) {
     return this.usersRepository.deleteUser(id);

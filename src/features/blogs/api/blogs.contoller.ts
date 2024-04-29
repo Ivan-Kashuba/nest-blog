@@ -33,8 +33,6 @@ import { BlogsRepository } from '../infrastructure/blogs.repository';
 import { PostsQueryRepository } from '../../posts/infrastructure/posts.query.repository';
 import { Blog } from '../domain/Blog.entity';
 import { UserAuthGuard } from '../../../infrastructure/guards/user-auth.guard';
-import { User } from '../../../infrastructure/decorators/transform/get-user';
-import { UserTokenInfo } from '../../auth/types/auth.types';
 
 @Controller('blogs')
 export class BlogsController {

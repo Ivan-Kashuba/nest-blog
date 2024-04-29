@@ -12,17 +12,48 @@ export class UsersRepository {
         { 'accountData.login': loginOrEmail },
         { 'accountData.email': loginOrEmail },
       ],
-    }).lean();
+    });
   }
 
   async findUserById(userId: string): Promise<TUserModel | null> {
     return this.UserModel.findOne({ id: userId });
   }
 
+  async findUserByRegistrationActivationCode(code: string) {
+    return this.UserModel.findOne({
+      'accountConfirmation.confirmationCode': code,
+    });
+  }
+
+  async updateUserByLoginOrEmail(
+    loginOrEmail: string,
+    updateInfo: Partial<User>,
+  ) {
+    return this.UserModel.findOneAndUpdate(
+      {
+        $or: [
+          { 'accountData.login': loginOrEmail },
+          { 'accountData.email': loginOrEmail },
+        ],
+      },
+      {
+        $set: {
+          ...updateInfo,
+        },
+      },
+    );
+  }
+
   async deleteUser(userId: string) {
     const deletedResponse = await this.UserModel.deleteOne({ _id: userId });
 
     return deletedResponse.deletedCount === 1;
+  }
+
+  async findUserByPasswordRecoveryCode(code: string) {
+    return this.UserModel.findOne({
+      'passwordRecovery.confirmationCode': code,
+    }).lean();
   }
 
   async save(user: TUserDocument) {

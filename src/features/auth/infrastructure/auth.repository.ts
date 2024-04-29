@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 
 import { InjectModel } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
 import {
   Session,
   TSessionDocument,
   TSessionModel,
 } from '../domain/Session.entity';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class AuthRepository {
@@ -16,6 +16,28 @@ export class AuthRepository {
     const { _id } = await this.SessionModel.create(userSession);
 
     return !!_id;
+  }
+
+  async getUserSessionsList(userId: Types.ObjectId) {
+    return this.SessionModel.find({ userId: new Types.ObjectId(userId) });
+  }
+
+  async removeUserSession(sessionId: Types.ObjectId) {
+    const { deletedCount } = await this.SessionModel.deleteOne({
+      _id: sessionId,
+    });
+
+    return deletedCount === 1;
+  }
+
+  async updateUserDeviceSession(
+    sessionId: Types.ObjectId,
+    sessionToUpdate: Partial<Session>,
+  ) {
+    return this.SessionModel.findOneAndUpdate(
+      { _id: sessionId },
+      { $set: sessionToUpdate },
+    );
   }
 
   async save(post: TSessionDocument) {
