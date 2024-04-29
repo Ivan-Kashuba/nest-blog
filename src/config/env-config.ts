@@ -13,8 +13,7 @@ export const envConfig: Record<EnvVariables, string> = {
   [EnvVariables.PORT]: process.env.PORT || '8080',
   [EnvVariables.DB_NAME]: process.env.DB_NAME || 'local-db',
   [EnvVariables.JWT_SECRET_KEY]: process.env.JWT_SECRET_KEY || '123456789',
-  [EnvVariables.EMAIL_SENDER_PASSWORD]:
-    process.env.EMAIL_SENDER_PASSWORD || 'reIXhrS0ModiM4c',
+  [EnvVariables.EMAIL_SENDER_PASSWORD]: process.env.EMAIL_SENDER_PASSWORD || '',
   [EnvVariables.ADMIN_AUTH_HEADER]:
     process.env.ADMIN_AUTH_HEADER || 'Basic YWRtaW46cXdlcnR5',
 };

@@ -56,11 +56,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
           subject: 'Blog operation',
         },
         transport: {
-          // service: 'gmail',
-          host: 'smtp.gmail.com',
-          port: 465,
-          secure: true,
-          ignoreTLS: true,
+          service: 'gmail',
           auth: {
             user: 'blog.kashuba.sender@gmail.com',
             pass: config.get(EnvVariables.EMAIL_SENDER_PASSWORD),
