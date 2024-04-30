@@ -1,6 +1,9 @@
-import { UserLoginOrEmailExists } from '../../../../../infrastructure/decorators/validation/is-user-login-available';
+import { IsEmail, IsNotEmpty } from 'class-validator';
+import { Trim } from '../../../../../infrastructure/decorators/transform/trim';
 
 export class EmailResendingInputModel {
-  @UserLoginOrEmailExists(true, { message: 'User is not found' })
+  @IsNotEmpty()
+  @Trim()
+  @IsEmail()
   email: string;
 }

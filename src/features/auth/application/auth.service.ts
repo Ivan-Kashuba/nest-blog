@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { UsersRepository } from '../../users/infrastructure/users.repository';
 import { JwtService } from '../../../application/jwt.service';
 import { Types } from 'mongoose';
@@ -119,7 +115,9 @@ export class AuthService {
     const user = await this.usersRepository.findUserByLoginOrEmail(userEmail);
 
     if (!user || user.accountConfirmation.isConfirmed) {
-      throw new NotFoundException();
+      throw new BadRequestException(
+        ResultService.createError('email', 'Not found email to confirm'),
+      );
     }
 
     user.accountConfirmation = {
@@ -141,9 +139,7 @@ export class AuthService {
       await this.usersRepository.findUserByRegistrationActivationCode(code);
 
     if (!userToConfirm) {
-      throw new BadRequestException(
-        ResultService.createError('code', 'User to confirm is not found'),
-      );
+      return;
     }
 
     await this.usersRepository.updateUserByLoginOrEmail(
@@ -158,8 +154,6 @@ export class AuthService {
 
   async refreshToken(refreshToken: string) {
     const user = await this.jwtService.getUserInfoByToken(refreshToken);
-
-    console.log('user:', user);
 
     if (!user) {
       return null;
