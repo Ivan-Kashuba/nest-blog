@@ -98,13 +98,11 @@ export class AuthService {
         confirmationCode: null,
       },
     });
-
-    await this.emailManager.sendRegistrationConfirmEmail(
-      userInfo.email,
-      confirmationCode,
-    );
-
     await this.usersRepository.save(userInDb);
+
+    this.emailManager
+      .sendRegistrationConfirmEmail(userInfo.email, confirmationCode)
+      .catch((err) => console.log('Email error' + err));
 
     return userInDb._id;
   }
@@ -128,10 +126,11 @@ export class AuthService {
 
     await this.usersRepository.save(user);
 
-    await this.emailManager.sendRegistrationConfirmEmail(
-      userEmail,
-      confirmationCode,
-    );
+    this.emailManager
+      .sendRegistrationConfirmEmail(userEmail, confirmationCode)
+      .catch((err) => console.log('Email error' + err));
+
+    return;
   }
 
   async confirmRegistrationCode(code: string) {
@@ -139,7 +138,9 @@ export class AuthService {
       await this.usersRepository.findUserByRegistrationActivationCode(code);
 
     if (!userToConfirm) {
-      return;
+      throw new BadRequestException(
+        ResultService.createError('code', 'Code to confirm was not found'),
+      );
     }
 
     await this.usersRepository.updateUserByLoginOrEmail(
@@ -242,14 +243,16 @@ export class AuthService {
       return true;
     }
 
-    await this.emailManager.sendPasswordRecoveryEmail(email, confirmationCode);
-
     await this.usersRepository.updateUserByLoginOrEmail(email, {
       passwordRecovery: {
         confirmationCode,
         expirationDate: add(new Date(), { hours: 24 }).toISOString(),
       },
     });
+
+    this.emailManager
+      .sendPasswordRecoveryEmail(email, confirmationCode)
+      .catch((err) => console.log('Email error' + err));
   }
 
   async setNewPasswordForUserByCode(recoveryCode: string, newPassword: string) {
