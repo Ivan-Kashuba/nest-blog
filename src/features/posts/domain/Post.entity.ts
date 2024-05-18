@@ -22,17 +22,15 @@ export class Post {
   extendedLikesInfo: ExtendedLikes;
 
   async like(likeStatus: LIKE_STATUS, userId: Types.ObjectId, login: string) {
-    const that = this as unknown as TPostDocument;
-
     if (!Object.values(LIKE_STATUS).includes(likeStatus))
       throw new Error('Not valid likeStatus');
 
-    const userLikeIndex = that.extendedLikesInfo.extendedLikes.findIndex(
+    const userLikeIndex = this.extendedLikesInfo.extendedLikes.findIndex(
       (like) => like.userId === userId,
     );
 
     const extendedLikesInfo =
-      that.extendedLikesInfo?.extendedLikes[userLikeIndex];
+      this.extendedLikesInfo?.extendedLikes[userLikeIndex];
 
     const previousLikeStatus = extendedLikesInfo?.status || LIKE_STATUS.None;
 
@@ -46,7 +44,7 @@ export class Post {
         extendedLikesInfo.firstLikeDate = new Date().toISOString();
       }
     } else {
-      that.extendedLikesInfo.extendedLikes.push({
+      this.extendedLikesInfo.extendedLikes.push({
         status: likeStatus,
         userId,
         userLogin: login,
@@ -55,24 +53,23 @@ export class Post {
           likeStatus === LIKE_STATUS.Like ? new Date().toISOString() : null,
       });
     }
-    reCountLikes(previousLikeStatus);
+    this.reCountLikes(previousLikeStatus, likeStatus);
+  }
+  reCountLikes(previousLikeStatus: LIKE_STATUS, likeStatus: LIKE_STATUS) {
+    if (previousLikeStatus === LIKE_STATUS.Like) {
+      this.extendedLikesInfo.likesCount -= 1;
+    }
 
-    function reCountLikes(previousLikeStatus: LIKE_STATUS) {
-      if (previousLikeStatus === LIKE_STATUS.Like) {
-        that.extendedLikesInfo.likesCount -= 1;
-      }
+    if (previousLikeStatus === LIKE_STATUS.Dislike) {
+      this.extendedLikesInfo.dislikesCount -= 1;
+    }
 
-      if (previousLikeStatus === LIKE_STATUS.Dislike) {
-        that.extendedLikesInfo.dislikesCount -= 1;
-      }
+    if (likeStatus === LIKE_STATUS.Like) {
+      this.extendedLikesInfo.likesCount += 1;
+    }
 
-      if (likeStatus === LIKE_STATUS.Like) {
-        that.extendedLikesInfo.likesCount += 1;
-      }
-
-      if (likeStatus === LIKE_STATUS.Dislike) {
-        that.extendedLikesInfo.dislikesCount += 1;
-      }
+    if (likeStatus === LIKE_STATUS.Dislike) {
+      this.extendedLikesInfo.dislikesCount += 1;
     }
   }
 }
@@ -81,6 +78,7 @@ export const PostSchema = SchemaFactory.createForClass(Post);
 
 const PostMethods = {
   like: Post.prototype.like,
+  reCountLikes: Post.prototype.reCountLikes,
 };
 
 PostSchema.methods = PostMethods;
