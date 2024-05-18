@@ -11,7 +11,7 @@ export class ExtendedLike {
   @Prop({ type: String, default: new Date().toISOString })
   addedAt: string;
   @Prop({ type: String || null, default: null })
-  firstLikeDate: string;
+  firstLikeDate: string | null;
   @Prop({ required: true })
   userLogin: string;
 }

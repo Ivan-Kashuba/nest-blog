@@ -20,6 +20,7 @@ export class PostsService {
       shortDescription,
       title,
       content,
+      extendedLikesInfo: { extendedLikes: [], likesCount: 0, dislikesCount: 0 },
     });
 
     await this.postsRepository.save(newPost);

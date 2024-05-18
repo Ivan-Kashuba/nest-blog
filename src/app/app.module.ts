@@ -41,12 +41,24 @@ import { AuthRepository } from '../features/auth/infrastructure/auth.repository'
 import { UserInfoFromTokenIfExists } from '../infrastructure/middlewares/get-info-from-token-if-exists';
 import { EmailManager } from '../adapters/email.manager';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { CommentsRepository } from '../features/comments/infrastructure/comments.repository';
+import { CqrsModule } from '@nestjs/cqrs';
+import { UpdateCommentHandler } from '../features/comments/application/use-cases/update-comment.handler';
+import { CreateCommentHandler } from '../features/posts/application/use-cases/create-comment.handler';
+import { UpdatePostLikeHandler } from '../features/posts/application/use-cases/update-post-like-status.handler';
+
+export const CommandHandlers = [
+  UpdateCommentHandler,
+  CreateCommentHandler,
+  UpdatePostLikeHandler,
+];
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       load: [config],
     }),
+    CqrsModule,
     MailerModule.forRootAsync({
       imports: [ConfigModule], // Make sure ConfigService is available
       inject: [ConfigService], // Inject ConfigService to use it in factory
@@ -104,6 +116,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
     UserLoginOrEmailExistsConstraint,
     AuthService,
     AuthRepository,
+    CommentsRepository,
+    ...CommandHandlers,
   ],
 })
 export class AppModule {

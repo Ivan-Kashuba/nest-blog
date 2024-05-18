@@ -10,6 +10,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 
 import { CommentsQueryRepository } from '../../comments/infrastructure/comments.query.repository';
@@ -31,6 +32,13 @@ import {
 } from '../../../infrastructure/pagination/types/pagination.types';
 import { ValidateObjectIdPipe } from '../../../infrastructure/pipes/object-id.pipe';
 import { User } from '../../../infrastructure/decorators/transform/get-user';
+import { CommentInputModel } from '../../comments/api/models/input/create-comment.input.model';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreateCommentCommand } from '../application/use-cases/create-comment.handler';
+import { UserAuthGuard } from '../../../infrastructure/guards/user-auth.guard';
+import { UserTokenInfo } from '../../auth/types/auth.types';
+import { UpdatePostLikeStatusCommand } from '../application/use-cases/update-post-like-status.handler';
+import { LikeInputModel } from '../../likes/api/models/input/like.input.model';
 
 @Controller('posts')
 export class PostsController {
@@ -40,6 +48,7 @@ export class PostsController {
     private readonly postsService: PostsService,
     private readonly postsRepository: PostsRepository,
     private readonly commentsQueryRepository: CommentsQueryRepository,
+    private readonly commandBus: CommandBus,
   ) {}
 
   @Get()
@@ -145,5 +154,42 @@ export class PostsController {
     if (!isPostUpdated) {
       throw new NotFoundException();
     }
+  }
+
+  @UseGuards(UserAuthGuard)
+  @Post(':postId/comments')
+  @HttpCode(HttpStatus.CREATED)
+  async createCommentForPost(
+    @Param('postId', ValidateObjectIdPipe) postId: Types.ObjectId,
+    @Body() comment: CommentInputModel,
+    @User() user: UserTokenInfo,
+  ) {
+    const createCommentCommand = new CreateCommentCommand({
+      postId,
+      user,
+      content: comment.content,
+    });
+
+    const createdCommentId =
+      await this.commandBus.execute(createCommentCommand);
+
+    return await this.commentsQueryRepository.findCommentById(createdCommentId);
+  }
+
+  @UseGuards(UserAuthGuard)
+  @Put(':postId/like-status')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async updatePostLikeStatus(
+    @Param('postId', ValidateObjectIdPipe) postId: Types.ObjectId,
+    @Body() { likeStatus }: LikeInputModel,
+    @User() user: UserTokenInfo,
+  ) {
+    const updatePostLikeCommand = new UpdatePostLikeStatusCommand({
+      postId,
+      likeStatus,
+      user,
+    });
+
+    await this.commandBus.execute(updatePostLikeCommand);
   }
 }

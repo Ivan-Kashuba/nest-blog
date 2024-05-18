@@ -45,7 +45,6 @@ export class BlogsController {
     private readonly blogsRepository: BlogsRepository,
   ) {}
 
-  @UseGuards(UserAuthGuard)
   @Get()
   async getBlogs(
     @Query()
@@ -62,6 +61,7 @@ export class BlogsController {
     return await this.blogsQueryRepository.findBlogs(nameToFind, pagination);
   }
 
+  @UseGuards(UserAuthGuard)
   @Post()
   async createBlog(
     @Body() blogInputData: BlogInputModel,
@@ -71,6 +71,7 @@ export class BlogsController {
     return BlogOutputModelMapper(createdBlog);
   }
 
+  @UseGuards(UserAuthGuard)
   @Post(':blogId/posts')
   async createPostForBlog(
     @Param('blogId', ValidateObjectIdPipe) blogId: Types.ObjectId,
@@ -128,6 +129,7 @@ export class BlogsController {
     );
   }
 
+  @UseGuards(UserAuthGuard)
   @Delete(':blogId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('blogId', ValidateObjectIdPipe) blogId: string) {
@@ -138,6 +140,7 @@ export class BlogsController {
     }
   }
 
+  @UseGuards(UserAuthGuard)
   @Put(':blogId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlog(
