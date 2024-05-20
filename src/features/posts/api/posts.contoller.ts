@@ -39,6 +39,7 @@ import { UserAuthGuard } from '../../../infrastructure/guards/user-auth.guard';
 import { UserTokenInfo } from '../../auth/types/auth.types';
 import { UpdatePostLikeStatusCommand } from '../application/use-cases/update-post-like-status.handler';
 import { LikeInputModel } from '../../likes/api/models/input/like.input.model';
+import { AdminAuthGuard } from '../../../infrastructure/guards/admin-auth.guard';
 
 @Controller('posts')
 export class PostsController {
@@ -74,6 +75,7 @@ export class PostsController {
   }
 
   @Post()
+  @UseGuards(AdminAuthGuard)
   async createPost(
     @Body() postInputData: PostInputModel,
   ): Promise<PostOutputModel> {
@@ -128,6 +130,7 @@ export class PostsController {
     );
   }
 
+  @UseGuards(AdminAuthGuard)
   @Delete(':postId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePost(
@@ -140,6 +143,7 @@ export class PostsController {
     }
   }
 
+  @UseGuards(AdminAuthGuard)
   @Put(':postId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(

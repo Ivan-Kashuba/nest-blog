@@ -48,6 +48,7 @@ import { CreateCommentHandler } from '../features/posts/application/use-cases/cr
 import { UpdatePostLikeHandler } from '../features/posts/application/use-cases/update-post-like-status.handler';
 import { DeleteCommentHandler } from '../features/comments/application/use-cases/delete-comment.handler';
 import { UpdateCommentLikeHandler } from '../features/comments/application/use-cases/update-comment-like.handler';
+import { IsBlogIdExistsConstraint } from '../infrastructure/decorators/validation/is-blogId-available';
 
 export const CommandHandlers = [
   UpdateCommentHandler,
@@ -118,6 +119,7 @@ export const CommandHandlers = [
     PostsQueryRepository,
     CommentsQueryRepository,
     UserLoginOrEmailExistsConstraint,
+    IsBlogIdExistsConstraint,
     AuthService,
     AuthRepository,
     CommentsRepository,

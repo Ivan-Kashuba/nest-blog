@@ -33,6 +33,9 @@ import { BlogsRepository } from '../infrastructure/blogs.repository';
 import { PostsQueryRepository } from '../../posts/infrastructure/posts.query.repository';
 import { Blog } from '../domain/Blog.entity';
 import { UserAuthGuard } from '../../../infrastructure/guards/user-auth.guard';
+import { AdminAuthGuard } from '../../../infrastructure/guards/admin-auth.guard';
+import { User } from '../../../infrastructure/decorators/transform/get-user';
+import { PostForBlogInputModel } from './models/input/create-post-for-blog.input.model';
 
 @Controller('blogs')
 export class BlogsController {
@@ -61,7 +64,7 @@ export class BlogsController {
     return await this.blogsQueryRepository.findBlogs(nameToFind, pagination);
   }
 
-  @UseGuards(UserAuthGuard)
+  @UseGuards(AdminAuthGuard)
   @Post()
   async createBlog(
     @Body() blogInputData: BlogInputModel,
@@ -71,12 +74,12 @@ export class BlogsController {
     return BlogOutputModelMapper(createdBlog);
   }
 
-  @UseGuards(UserAuthGuard)
+  @UseGuards(AdminAuthGuard)
   @Post(':blogId/posts')
   async createPostForBlog(
     @Param('blogId', ValidateObjectIdPipe) blogId: Types.ObjectId,
     @Body()
-    postInputData: Omit<PostInputModel, 'blogId'>,
+    postInputData: PostForBlogInputModel,
   ): Promise<any> {
     const blog = await this.blogsRepository.findBlogById(blogId);
 
@@ -112,8 +115,10 @@ export class BlogsController {
   async getPostsForBlog(
     @Query() queryParams: Partial<PaginationPayload<PostOutputModel>>,
     @Param('blogId', ValidateObjectIdPipe) blogId: string,
+    @User('userId') userId: Types.ObjectId,
   ): Promise<WithPagination<PostOutputModel>> {
     const foundedBlog = await this.blogsQueryRepository.findBlogById(blogId);
+
     const pagination = this.paginationService.validatePayloadPagination(
       queryParams,
       'createdAt',
@@ -126,10 +131,11 @@ export class BlogsController {
     return await this.blogsQueryRepository.findPostsForBlog(
       foundedBlog,
       pagination,
+      userId,
     );
   }
 
-  @UseGuards(UserAuthGuard)
+  @UseGuards(AdminAuthGuard)
   @Delete(':blogId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('blogId', ValidateObjectIdPipe) blogId: string) {
@@ -140,7 +146,7 @@ export class BlogsController {
     }
   }
 
-  @UseGuards(UserAuthGuard)
+  @UseGuards(AdminAuthGuard)
   @Put(':blogId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlog(
