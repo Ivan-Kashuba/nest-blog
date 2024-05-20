@@ -66,9 +66,11 @@ export class CommentsQueryRepository {
     const likesCount = dbLikes.filter(
       (like) => like.status === LIKE_STATUS.Like,
     ).length;
+
     const dislikesCount = dbLikes.filter(
       (like) => like.status === LIKE_STATUS.Dislike,
     ).length;
+
     const userLikeStatus =
       dbLikes.find((like) => like.userId === userId)?.status ||
       LIKE_STATUS.None;

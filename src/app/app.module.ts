@@ -46,11 +46,15 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { UpdateCommentHandler } from '../features/comments/application/use-cases/update-comment.handler';
 import { CreateCommentHandler } from '../features/posts/application/use-cases/create-comment.handler';
 import { UpdatePostLikeHandler } from '../features/posts/application/use-cases/update-post-like-status.handler';
+import { DeleteCommentHandler } from '../features/comments/application/use-cases/delete-comment.handler';
+import { UpdateCommentLikeHandler } from '../features/comments/application/use-cases/update-comment-like.handler';
 
 export const CommandHandlers = [
   UpdateCommentHandler,
   CreateCommentHandler,
   UpdatePostLikeHandler,
+  DeleteCommentHandler,
+  UpdateCommentLikeHandler,
 ];
 
 @Module({
