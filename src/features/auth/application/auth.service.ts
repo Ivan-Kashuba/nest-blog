@@ -215,13 +215,13 @@ export class AuthService {
     });
   }
 
-  async logout(userId: Types.ObjectId, refreshToken: string) {
+  async logout(refreshToken: string) {
     const user = await this.jwtService.getUserInfoByToken(refreshToken);
 
     if (!user) return false;
 
     const validSession = await this.getUserSessionByIdAndRefreshToken(
-      userId,
+      user.userId,
       refreshToken,
     );
 
@@ -288,8 +288,8 @@ export class AuthService {
   }
 
   async createJwtKeys(userInfo: UserTokenInfo) {
-    const accessToken = await this.jwtService.createJwt(userInfo, '6m');
-    const refreshToken = await this.jwtService.createJwt(userInfo, '30d');
+    const accessToken = await this.jwtService.createJwt(userInfo, '10s');
+    const refreshToken = await this.jwtService.createJwt(userInfo, '20s');
 
     return {
       accessToken,

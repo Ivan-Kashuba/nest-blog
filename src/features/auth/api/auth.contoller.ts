@@ -25,11 +25,12 @@ import { Cookies } from '../../../infrastructure/decorators/transform/cookies';
 import { PasswordRecoveryInputModel } from './models/input/password-recovery.input.model';
 import { NewPasswordInputModel } from './models/input/new-password.input.model';
 import { ResultService } from '../../../infrastructure/resultService/ResultService';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
+  @UseGuards(ThrottlerGuard)
   @Post('login')
   async login(
     @Body() loginInputModel: LoginInputModel,
@@ -60,6 +61,7 @@ export class AuthController {
       });
   }
 
+  @UseGuards(ThrottlerGuard)
   @Post('registration')
   @HttpCode(HttpStatus.NO_CONTENT)
   async registration(@Body() userCreateModel: UserCreateModel) {
@@ -70,12 +72,14 @@ export class AuthController {
     }
   }
 
+  @UseGuards(ThrottlerGuard)
   @Post('registration-email-resending')
   @HttpCode(HttpStatus.NO_CONTENT)
   async resendRegistrationEmail(@Body() { email }: EmailResendingInputModel) {
     await this.authService.resendRegistrationCode(email);
   }
 
+  @UseGuards(ThrottlerGuard)
   @Post('registration-confirmation')
   @HttpCode(HttpStatus.NO_CONTENT)
   async registrationEmailConfirmation(
@@ -120,26 +124,26 @@ export class AuthController {
       });
   }
 
-  @UseGuards(UserAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async logout(
-    @User() user: UserTokenInfo,
-    @Cookies('refreshToken') refreshToken: string,
-  ) {
-    const isLogout = await this.authService.logout(user.userId, refreshToken);
+  async logout(@Cookies('refreshToken') refreshToken: string) {
+    const isLogout = await this.authService.logout(refreshToken);
 
     if (!isLogout) {
       throw new UnauthorizedException();
     }
+
+    return true;
   }
 
+  @UseGuards(ThrottlerGuard)
   @Post('password-recovery')
   @HttpCode(HttpStatus.NO_CONTENT)
   async passwordRecovery(@Body() { email }: PasswordRecoveryInputModel) {
     await this.authService.recoveryPassword(email);
   }
 
+  @UseGuards(ThrottlerGuard)
   @Post('new-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   async setNewPassword(

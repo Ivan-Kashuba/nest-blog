@@ -49,6 +49,12 @@ import { UpdatePostLikeHandler } from '../features/posts/application/use-cases/u
 import { DeleteCommentHandler } from '../features/comments/application/use-cases/delete-comment.handler';
 import { UpdateCommentLikeHandler } from '../features/comments/application/use-cases/update-comment-like.handler';
 import { IsBlogIdExistsConstraint } from '../infrastructure/decorators/validation/is-blogId-available';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { SecurityController } from '../features/auth/api/security.controller';
+import { GetSessionDevicesHandler } from '../features/auth/application/use-cases/get-session-devices.handler';
+import { SecurityQueryRepository } from '../features/auth/infrastructure/security.query.repository';
+import { RemoveAllButCurrentSessionHandler } from '../features/auth/application/use-cases/remove-all-but-current-sessions.handler';
+import { RemoveSessionByIdHandler } from '../features/auth/application/use-cases/remove-session-by-id.handler';
 
 export const CommandHandlers = [
   UpdateCommentHandler,
@@ -56,6 +62,9 @@ export const CommandHandlers = [
   UpdatePostLikeHandler,
   DeleteCommentHandler,
   UpdateCommentLikeHandler,
+  GetSessionDevicesHandler,
+  RemoveAllButCurrentSessionHandler,
+  RemoveSessionByIdHandler,
 ];
 
 @Module({
@@ -63,6 +72,12 @@ export const CommandHandlers = [
     ConfigModule.forRoot({
       load: [config],
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 10000,
+        limit: 5,
+      },
+    ]),
     CqrsModule,
     MailerModule.forRootAsync({
       imports: [ConfigModule], // Make sure ConfigService is available
@@ -102,6 +117,7 @@ export const CommandHandlers = [
     PostsController,
     CommentsController,
     AuthController,
+    SecurityController,
   ],
   providers: [
     JwtService,
@@ -123,6 +139,7 @@ export const CommandHandlers = [
     AuthService,
     AuthRepository,
     CommentsRepository,
+    SecurityQueryRepository,
     ...CommandHandlers,
   ],
 })

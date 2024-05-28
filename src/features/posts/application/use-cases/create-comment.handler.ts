@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { IsNotEmpty, Length, validateOrReject } from 'class-validator';
 import { Types } from 'mongoose';
 import { plainToClass } from 'class-transformer';
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { PostsRepository } from '../../infrastructure/posts.repository';
 import { CommentsRepository } from '../../../comments/infrastructure/comments.repository';
 import { InjectModel } from '@nestjs/mongoose';

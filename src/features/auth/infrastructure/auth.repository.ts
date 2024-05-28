@@ -24,7 +24,7 @@ export class AuthRepository {
 
   async removeUserSession(sessionId: Types.ObjectId) {
     const { deletedCount } = await this.SessionModel.deleteOne({
-      _id: sessionId,
+      _id: new Types.ObjectId(sessionId),
     });
 
     return deletedCount === 1;
@@ -38,6 +38,23 @@ export class AuthRepository {
       { _id: sessionId },
       { $set: sessionToUpdate },
     );
+  }
+
+  async removeAllButCurrentUserSession(
+    userId: Types.ObjectId,
+    currentSessionId: Types.ObjectId,
+  ) {
+    const deleteResult = await this.SessionModel.deleteMany({
+      userId: new Types.ObjectId(userId),
+      _id: { $ne: new Types.ObjectId(currentSessionId) },
+    });
+    return deleteResult.acknowledged;
+  }
+
+  async getSessionByDeviceId(deviceId: Types.ObjectId) {
+    return this.SessionModel.findOne({
+      deviceId: new Types.ObjectId(deviceId),
+    });
   }
 
   async save(post: TSessionDocument) {
