@@ -1,3 +1,6 @@
+import * as process from 'process';
+import { getRepository } from './repository-config';
+
 export enum EnvVariables {
   MONGO_URI = 'MONGO_URI',
   PORT = 'PORT',
@@ -5,6 +8,7 @@ export enum EnvVariables {
   JWT_SECRET_KEY = 'JWT_SECRET_KEY',
   EMAIL_SENDER_PASSWORD = 'EMAIL_SENDER_PASSWORD',
   ADMIN_AUTH_HEADER = 'ADMIN_AUTH_HEADER',
+  REPOSITORY = 'REPOSITORY',
 }
 
 export const envConfig: Record<EnvVariables, string> = {
@@ -16,6 +20,7 @@ export const envConfig: Record<EnvVariables, string> = {
   [EnvVariables.EMAIL_SENDER_PASSWORD]: process.env.EMAIL_SENDER_PASSWORD || '',
   [EnvVariables.ADMIN_AUTH_HEADER]:
     process.env.ADMIN_AUTH_HEADER || 'Basic YWRtaW46cXdlcnR5',
+  [EnvVariables.REPOSITORY]: getRepository(process.env.REPOSITORY),
 };
 
 export default () => ({

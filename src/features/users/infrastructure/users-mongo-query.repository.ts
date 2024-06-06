@@ -6,7 +6,7 @@ import { PaginationService } from '../../../infrastructure/pagination/service/pa
 import { UserOutputModel } from '../api/models/output/user.output.model';
 
 @Injectable()
-export class UsersQueryRepository {
+export class UsersMongoQueryRepository {
   constructor(
     @InjectModel(User.name) private UserModel: TUserModel,
     private readonly paginationService: PaginationService,

@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CommentsRepository } from '../../infrastructure/comments.repository';
+import { CommentsMongoRepository } from '../../infrastructure/comments-mongo.repository';
 import { IsNotEmpty, Length, validateOrReject } from 'class-validator';
 import { Types } from 'mongoose';
 import { plainToClass } from 'class-transformer';
@@ -21,7 +21,7 @@ export class UpdateCommentCommand {
 export class UpdateCommentHandler
   implements ICommandHandler<UpdateCommentCommand>
 {
-  constructor(private commentsRepository: CommentsRepository) {}
+  constructor(private commentsRepository: CommentsMongoRepository) {}
 
   async execute(command: UpdateCommentCommand) {
     await validateOrReject(command);

@@ -2,7 +2,7 @@ import { HydratedDocument, Model, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { UserCreateModel } from '../api/models/input/create-user.input.model';
 import bcrypt from 'bcryptjs';
-import { UsersRepository } from '../infrastructure/users.repository';
+import { UsersRepository } from '../infrastructure/abstract-users.repository';
 
 @Schema({ _id: false, timestamps: { createdAt: true } })
 export class UserAccountData {

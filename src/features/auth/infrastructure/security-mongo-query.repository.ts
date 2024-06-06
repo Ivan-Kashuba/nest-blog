@@ -8,7 +8,7 @@ import {
 } from '../api/models/output/session.output.model';
 
 @Injectable()
-export class SecurityQueryRepository {
+export class SecurityMongoQueryRepository {
   constructor(@InjectModel(Session.name) private SessionModel: TSessionModel) {}
   async getUserSessionsListById(
     userId: Types.ObjectId,

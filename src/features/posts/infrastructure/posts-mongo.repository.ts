@@ -5,7 +5,7 @@ import { Types } from 'mongoose';
 import { Post, TPostDocument, TPostModel } from '../domain/Post.entity';
 
 @Injectable()
-export class PostsRepository {
+export class PostsMongoRepository {
   constructor(@InjectModel(Post.name) private PostModel: TPostModel) {}
 
   async findPostById(postId: Types.ObjectId) {

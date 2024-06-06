@@ -9,7 +9,7 @@ import { PaginationPayload } from '../../../infrastructure/pagination/types/pagi
 import { CommentOutputModel } from '../api/models/output/comment.output.model';
 
 @Injectable()
-export class CommentsQueryRepository {
+export class CommentsMongoQueryRepository {
   constructor(
     @InjectModel(Comment.name) private CommentModel: TCommentModel,
     private readonly paginationService: PaginationService,

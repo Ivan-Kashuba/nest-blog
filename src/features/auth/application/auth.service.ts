@@ -1,10 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { UsersRepository } from '../../users/infrastructure/users.repository';
 import { JwtService } from '../../../application/jwt.service';
 import { Types } from 'mongoose';
 import { UserTokenInfo } from '../types/auth.types';
 import { LoginInputModel } from '../api/models/input/login.input.model';
-import { AuthRepository } from '../infrastructure/auth.repository';
+import { AuthMongoRepository } from '../infrastructure/auth-mongo.repository';
 import { add, isBefore } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -16,12 +15,13 @@ import { UserCreateModel } from '../../users/api/models/input/create-user.input.
 import { EmailManager } from '../../../adapters/email.manager';
 import { InjectModel } from '@nestjs/mongoose';
 import { ResultService } from '../../../infrastructure/resultService/ResultService';
+import { UsersRepository } from '../../users/infrastructure/abstract-users.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersRepository: UsersRepository,
-    private readonly authRepository: AuthRepository,
+    private readonly authRepository: AuthMongoRepository,
     protected readonly jwtService: JwtService,
     protected readonly emailManager: EmailManager,
     @InjectModel(User.name) private UserModel: TUserModel,
@@ -288,8 +288,8 @@ export class AuthService {
   }
 
   async createJwtKeys(userInfo: UserTokenInfo) {
-    const accessToken = await this.jwtService.createJwt(userInfo, '10s');
-    const refreshToken = await this.jwtService.createJwt(userInfo, '20s');
+    const accessToken = await this.jwtService.createJwt(userInfo, '6m');
+    const refreshToken = await this.jwtService.createJwt(userInfo, '30d');
 
     return {
       accessToken,

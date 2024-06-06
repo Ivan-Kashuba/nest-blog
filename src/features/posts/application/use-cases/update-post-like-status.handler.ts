@@ -3,7 +3,7 @@ import { IsEnum, IsNotEmpty, validateOrReject } from 'class-validator';
 import { Types } from 'mongoose';
 import { plainToClass } from 'class-transformer';
 import { NotFoundException } from '@nestjs/common';
-import { PostsRepository } from '../../infrastructure/posts.repository';
+import { PostsMongoRepository } from '../../infrastructure/posts-mongo.repository';
 import { LIKE_STATUS } from '../../../likes/domain/like.type';
 import { UserTokenInfo } from '../../../auth/types/auth.types';
 import { TPostDocument } from '../../domain/Post.entity';
@@ -25,7 +25,7 @@ export class UpdatePostLikeStatusCommand {
 export class UpdatePostLikeHandler
   implements ICommandHandler<UpdatePostLikeStatusCommand>
 {
-  constructor(private postsRepository: PostsRepository) {}
+  constructor(private postsRepository: PostsMongoRepository) {}
 
   async execute(command: UpdatePostLikeStatusCommand) {
     await validateOrReject(command);

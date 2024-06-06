@@ -21,15 +21,15 @@ import {
   BlogOutputModel,
   BlogOutputModelMapper,
 } from './models/output/blog.output.model';
-import { BlogsQueryRepository } from '../infrastructure/blogs.query.repository';
+import { BlogsMongoQueryRepository } from '../infrastructure/blogs-mongo-query.repository';
 import { BlogInputModel } from './models/input/create-blog.input.model';
 import { BlogsService } from '../application/blogs.service';
 import { ValidateObjectIdPipe } from '../../../infrastructure/pipes/object-id.pipe';
 import { PostOutputModel } from '../../posts/api/models/output/post.output.model';
 import { Types } from 'mongoose';
 import { PostsService } from '../../posts/application/posts.service';
-import { BlogsRepository } from '../infrastructure/blogs.repository';
-import { PostsQueryRepository } from '../../posts/infrastructure/posts.query.repository';
+import { BlogsMongoRepository } from '../infrastructure/blogs-mongo.repository';
+import { PostsMongoQueryRepository } from '../../posts/infrastructure/posts-mongo-query.repository';
 import { Blog } from '../domain/Blog.entity';
 import { AdminAuthGuard } from '../../../infrastructure/guards/admin-auth.guard';
 import { User } from '../../../infrastructure/decorators/transform/get-user';
@@ -39,11 +39,11 @@ import { PostForBlogInputModel } from './models/input/create-post-for-blog.input
 export class BlogsController {
   constructor(
     private readonly paginationService: PaginationService,
-    private readonly blogsQueryRepository: BlogsQueryRepository,
+    private readonly blogsQueryRepository: BlogsMongoQueryRepository,
     private readonly blogsService: BlogsService,
     private readonly postsService: PostsService,
-    private readonly postsQueryRepository: PostsQueryRepository,
-    private readonly blogsRepository: BlogsRepository,
+    private readonly postsQueryRepository: PostsMongoQueryRepository,
+    private readonly blogsRepository: BlogsMongoRepository,
   ) {}
 
   @Get()

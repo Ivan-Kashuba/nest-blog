@@ -8,7 +8,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from '../auth.service';
-import { AuthRepository } from '../../infrastructure/auth.repository';
+import { AuthMongoRepository } from '../../infrastructure/auth-mongo.repository';
 import { Types } from 'mongoose';
 
 export class RemoveSessionByIdCommand {
@@ -29,7 +29,7 @@ export class RemoveSessionByIdHandler
   constructor(
     private jwtService: JwtService,
     private authService: AuthService,
-    private authRepository: AuthRepository,
+    private authRepository: AuthMongoRepository,
   ) {}
 
   async execute(command: RemoveSessionByIdCommand) {

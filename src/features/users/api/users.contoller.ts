@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from '../application/users.service';
-import { UsersQueryRepository } from '../infrastructure/users.query.repository';
+import { UsersMongoQueryRepository } from '../infrastructure/users-mongo-query.repository';
 import {
   PaginationPayload,
   WithPagination,
@@ -26,12 +26,13 @@ import {
 } from './models/output/user.output.model';
 import { ValidateObjectIdPipe } from '../../../infrastructure/pipes/object-id.pipe';
 import { AdminAuthGuard } from '../../../infrastructure/guards/admin-auth.guard';
+
 @UseGuards(AdminAuthGuard)
-@Controller('users')
+@Controller('sa/users')
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-    private readonly usersQueryRepository: UsersQueryRepository,
+    private readonly usersQueryRepository: UsersMongoQueryRepository,
     private readonly paginationService: PaginationService,
   ) {}
 

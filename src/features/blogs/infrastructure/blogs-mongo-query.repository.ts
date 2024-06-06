@@ -14,15 +14,15 @@ import { PostOutputModel } from '../../posts/api/models/output/post.output.model
 import { Types } from 'mongoose';
 import { PostModelAfterAggregation } from '../../posts/domain/post.type';
 import { Post, TPostModel } from '../../posts/domain/Post.entity';
-import { PostsQueryRepository } from '../../posts/infrastructure/posts.query.repository';
+import { PostsMongoQueryRepository } from '../../posts/infrastructure/posts-mongo-query.repository';
 
 @Injectable()
-export class BlogsQueryRepository {
+export class BlogsMongoQueryRepository {
   constructor(
     @InjectModel(Blog.name) private BlogModel: TBlogModel,
     @InjectModel(Post.name) private PostModel: TPostModel,
     private readonly paginationService: PaginationService,
-    private readonly postsQueryRepository: PostsQueryRepository,
+    private readonly postsQueryRepository: PostsMongoQueryRepository,
   ) {}
 
   async findBlogs(

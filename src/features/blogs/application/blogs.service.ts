@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BlogsRepository } from '../infrastructure/blogs.repository';
+import { BlogsMongoRepository } from '../infrastructure/blogs-mongo.repository';
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog, TBlogModel } from '../domain/Blog.entity';
 import { BlogInputModel } from '../api/models/input/create-blog.input.model';
@@ -8,7 +8,7 @@ import { Types } from 'mongoose';
 @Injectable()
 export class BlogsService {
   constructor(
-    private readonly blogsRepository: BlogsRepository,
+    private readonly blogsRepository: BlogsMongoRepository,
 
     @InjectModel(Blog.name) private BlogModel: TBlogModel,
   ) {}

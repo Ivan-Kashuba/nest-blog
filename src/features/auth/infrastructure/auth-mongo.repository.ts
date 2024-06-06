@@ -9,7 +9,7 @@ import {
 import { Types } from 'mongoose';
 
 @Injectable()
-export class AuthRepository {
+export class AuthMongoRepository {
   constructor(@InjectModel(Session.name) private SessionModel: TSessionModel) {}
 
   async addUserSession(userSession: Session) {

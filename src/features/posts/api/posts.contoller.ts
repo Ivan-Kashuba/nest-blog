@@ -13,16 +13,16 @@ import {
   UseGuards,
 } from '@nestjs/common';
 
-import { CommentsQueryRepository } from '../../comments/infrastructure/comments.query.repository';
+import { CommentsMongoQueryRepository } from '../../comments/infrastructure/comments-mongo-query.repository';
 
 import { PostsService } from '../application/posts.service';
 
 import { PostInputModel } from './models/input/create-post.input.model';
 import { Types } from 'mongoose';
 
-import { PostsRepository } from '../infrastructure/posts.repository';
+import { PostsMongoRepository } from '../infrastructure/posts-mongo.repository';
 import { TPostDocument } from '../domain/Post.entity';
-import { PostsQueryRepository } from '../infrastructure/posts.query.repository';
+import { PostsMongoQueryRepository } from '../infrastructure/posts-mongo-query.repository';
 import { PostOutputModel } from './models/output/post.output.model';
 import { CommentOutputModel } from '../../comments/api/models/output/comment.output.model';
 import { PaginationService } from '../../../infrastructure/pagination/service/pagination.service';
@@ -45,10 +45,10 @@ import { AdminAuthGuard } from '../../../infrastructure/guards/admin-auth.guard'
 export class PostsController {
   constructor(
     private readonly paginationService: PaginationService,
-    private readonly postsQueryRepository: PostsQueryRepository,
+    private readonly postsQueryRepository: PostsMongoQueryRepository,
     private readonly postsService: PostsService,
-    private readonly postsRepository: PostsRepository,
-    private readonly commentsQueryRepository: CommentsQueryRepository,
+    private readonly postsRepository: PostsMongoRepository,
+    private readonly commentsQueryRepository: CommentsMongoQueryRepository,
     private readonly commandBus: CommandBus,
   ) {}
 

@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CommentsRepository } from '../../infrastructure/comments.repository';
+import { CommentsMongoRepository } from '../../infrastructure/comments-mongo.repository';
 import { IsNotEmpty, validateOrReject } from 'class-validator';
 import { Types } from 'mongoose';
 import { plainToClass } from 'class-transformer';
@@ -20,7 +20,7 @@ export class DeleteCommentCommand {
 export class DeleteCommentHandler
   implements ICommandHandler<DeleteCommentCommand>
 {
-  constructor(private commentsRepository: CommentsRepository) {}
+  constructor(private commentsRepository: CommentsMongoRepository) {}
 
   async execute(command: DeleteCommentCommand) {
     await validateOrReject(command);

@@ -1,16 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { IsNotEmpty, Length, validateOrReject } from 'class-validator';
-import { Types } from 'mongoose';
+import { IsNotEmpty, validateOrReject } from 'class-validator';
 import { plainToClass } from 'class-transformer';
-import { CommentsRepository } from '../../../comments/infrastructure/comments.repository';
-import { InjectModel } from '@nestjs/mongoose';
-import {
-  Comment,
-  TCommentModel,
-} from '../../../comments/domain/Comment.entity';
 import { JwtService } from '../../../../application/jwt.service';
 import { UnauthorizedException } from '@nestjs/common';
-import { SecurityQueryRepository } from '../../infrastructure/security.query.repository';
+import { SecurityMongoQueryRepository } from '../../infrastructure/security-mongo-query.repository';
 
 export class GetSessionDevicesCommand {
   @IsNotEmpty()
@@ -27,7 +20,7 @@ export class GetSessionDevicesHandler
 {
   constructor(
     private jwtService: JwtService,
-    private securityQueryRepository: SecurityQueryRepository,
+    private securityQueryRepository: SecurityMongoQueryRepository,
   ) {}
 
   async execute(command: GetSessionDevicesCommand) {

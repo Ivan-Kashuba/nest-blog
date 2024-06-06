@@ -4,7 +4,7 @@ import { plainToClass } from 'class-transformer';
 import { JwtService } from '../../../../application/jwt.service';
 import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../auth.service';
-import { AuthRepository } from '../../infrastructure/auth.repository';
+import { AuthMongoRepository } from '../../infrastructure/auth-mongo.repository';
 
 export class RemoveAllButCurrentSessionCommand {
   @IsNotEmpty()
@@ -22,7 +22,7 @@ export class RemoveAllButCurrentSessionHandler
   constructor(
     private jwtService: JwtService,
     private authService: AuthService,
-    private authRepository: AuthRepository,
+    private authRepository: AuthMongoRepository,
   ) {}
 
   async execute(command: RemoveAllButCurrentSessionCommand) {

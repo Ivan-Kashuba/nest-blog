@@ -3,8 +3,8 @@ import { IsNotEmpty, Length, validateOrReject } from 'class-validator';
 import { Types } from 'mongoose';
 import { plainToClass } from 'class-transformer';
 import { NotFoundException } from '@nestjs/common';
-import { PostsRepository } from '../../infrastructure/posts.repository';
-import { CommentsRepository } from '../../../comments/infrastructure/comments.repository';
+import { PostsMongoRepository } from '../../infrastructure/posts-mongo.repository';
+import { CommentsMongoRepository } from '../../../comments/infrastructure/comments-mongo.repository';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   Comment,
@@ -30,8 +30,8 @@ export class CreateCommentHandler
 {
   constructor(
     @InjectModel(Comment.name) private CommentModel: TCommentModel,
-    private postsRepository: PostsRepository,
-    private commentsRepository: CommentsRepository,
+    private postsRepository: PostsMongoRepository,
+    private commentsRepository: CommentsMongoRepository,
   ) {}
 
   async execute(command: CreateCommentCommand) {

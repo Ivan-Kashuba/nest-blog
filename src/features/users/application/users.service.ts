@@ -1,15 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { UsersRepository } from '../infrastructure/users.repository';
 import { InjectModel } from '@nestjs/mongoose';
 import { TUserDocument, TUserModel, User } from '../domain/User.entity';
 import { UserCreateModel } from '../api/models/input/create-user.input.model';
 import { validateOrRejectModel } from '../../../infrastructure/errors/validateOrRejectModel';
+import { UsersRepository } from '../infrastructure/abstract-users.repository';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly usersRepository: UsersRepository,
-
     @InjectModel(User.name) private UserModel: TUserModel,
   ) {}
 

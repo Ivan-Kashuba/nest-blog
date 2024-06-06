@@ -1,23 +1,22 @@
-import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, Provider } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersController } from '../features/users/api/users.contoller';
 import { UsersService } from '../features/users/application/users.service';
-import { UsersRepository } from '../features/users/infrastructure/users.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from '../features/users/domain/User.entity';
-import { UsersQueryRepository } from '../features/users/infrastructure/users.query.repository';
+import { UsersMongoQueryRepository } from '../features/users/infrastructure/users-mongo-query.repository';
 import { PaginationService } from '../infrastructure/pagination/service/pagination.service';
 import { TestingController } from '../features/testing/api/testing.controller';
 import { BlogsController } from '../features/blogs/api/blogs.contoller';
 import { Blog, BlogSchema } from '../features/blogs/domain/Blog.entity';
-import { BlogsQueryRepository } from '../features/blogs/infrastructure/blogs.query.repository';
-import { BlogsRepository } from '../features/blogs/infrastructure/blogs.repository';
+import { BlogsMongoQueryRepository } from '../features/blogs/infrastructure/blogs-mongo-query.repository';
+import { BlogsMongoRepository } from '../features/blogs/infrastructure/blogs-mongo.repository';
 import { BlogsService } from '../features/blogs/application/blogs.service';
 import { PostsController } from '../features/posts/api/posts.contoller';
 import { PostsService } from '../features/posts/application/posts.service';
-import { PostsRepository } from '../features/posts/infrastructure/posts.repository';
-import { CommentsQueryRepository } from '../features/comments/infrastructure/comments.query.repository';
+import { PostsMongoRepository } from '../features/posts/infrastructure/posts-mongo.repository';
+import { CommentsMongoQueryRepository } from '../features/comments/infrastructure/comments-mongo-query.repository';
 import { Post, PostSchema } from '../features/posts/domain/Post.entity';
 import {
   Comment,
@@ -29,7 +28,7 @@ import {
   ExtendedLikesSchema,
 } from '../features/likes/domain/ExtendedLikes.entity';
 import { CommentsController } from '../features/comments/api/comments.contoller';
-import { PostsQueryRepository } from '../features/posts/infrastructure/posts.query.repository';
+import { PostsMongoQueryRepository } from '../features/posts/infrastructure/posts-mongo-query.repository';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import config, { envConfig, EnvVariables } from '../config/env-config';
 import { UserLoginOrEmailExistsConstraint } from '../infrastructure/decorators/validation/is-user-login-available';
@@ -37,11 +36,11 @@ import { AuthController } from '../features/auth/api/auth.contoller';
 import { JwtService } from '../application/jwt.service';
 import { AuthService } from '../features/auth/application/auth.service';
 import { Session, SessionSchema } from '../features/auth/domain/Session.entity';
-import { AuthRepository } from '../features/auth/infrastructure/auth.repository';
+import { AuthMongoRepository } from '../features/auth/infrastructure/auth-mongo.repository';
 import { UserInfoFromTokenIfExists } from '../infrastructure/middlewares/get-info-from-token-if-exists';
 import { EmailManager } from '../adapters/email.manager';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { CommentsRepository } from '../features/comments/infrastructure/comments.repository';
+import { CommentsMongoRepository } from '../features/comments/infrastructure/comments-mongo.repository';
 import { CqrsModule } from '@nestjs/cqrs';
 import { UpdateCommentHandler } from '../features/comments/application/use-cases/update-comment.handler';
 import { CreateCommentHandler } from '../features/posts/application/use-cases/create-comment.handler';
@@ -52,11 +51,15 @@ import { IsBlogIdExistsConstraint } from '../infrastructure/decorators/validatio
 import { ThrottlerModule } from '@nestjs/throttler';
 import { SecurityController } from '../features/auth/api/security.controller';
 import { GetSessionDevicesHandler } from '../features/auth/application/use-cases/get-session-devices.handler';
-import { SecurityQueryRepository } from '../features/auth/infrastructure/security.query.repository';
+import { SecurityMongoQueryRepository } from '../features/auth/infrastructure/security-mongo-query.repository';
 import { RemoveAllButCurrentSessionHandler } from '../features/auth/application/use-cases/remove-all-but-current-sessions.handler';
 import { RemoveSessionByIdHandler } from '../features/auth/application/use-cases/remove-session-by-id.handler';
+import {
+  repositoriesList,
+  RepositoryVariant,
+} from '../config/repository-config';
 
-export const CommandHandlers = [
+const CommandHandlers = [
   UpdateCommentHandler,
   CreateCommentHandler,
   UpdatePostLikeHandler,
@@ -65,6 +68,48 @@ export const CommandHandlers = [
   GetSessionDevicesHandler,
   RemoveAllButCurrentSessionHandler,
   RemoveSessionByIdHandler,
+];
+
+const Controllers = [
+  AppController,
+  TestingController,
+  UsersController,
+  BlogsController,
+  PostsController,
+  CommentsController,
+  AuthController,
+  SecurityController,
+];
+
+const Repositories = repositoriesList.map((repo) => {
+  return {
+    provide: repo.name,
+    useFactory: (configService: ConfigService) => {
+      console.log('configService:', configService);
+      const repositoryProviderName = configService.get<RepositoryVariant>(
+        EnvVariables.REPOSITORY,
+      );
+
+      console.log('repositoryProviderName:', repositoryProviderName);
+
+      return repo[repositoryProviderName!];
+    },
+    inject: [ConfigService],
+  };
+});
+
+// console.log('Repositories:', Repositories);
+
+const MongoRepositories: Provider[] = [
+  UsersMongoQueryRepository,
+  BlogsMongoQueryRepository,
+  BlogsMongoRepository,
+  PostsMongoRepository,
+  PostsMongoQueryRepository,
+  CommentsMongoQueryRepository,
+  AuthMongoRepository,
+  CommentsMongoRepository,
+  SecurityMongoQueryRepository,
 ];
 
 @Module({
@@ -109,37 +154,20 @@ export const CommandHandlers = [
       { name: Session.name, schema: SessionSchema },
     ]),
   ],
-  controllers: [
-    AppController,
-    TestingController,
-    UsersController,
-    BlogsController,
-    PostsController,
-    CommentsController,
-    AuthController,
-    SecurityController,
-  ],
+  controllers: [...Controllers],
   providers: [
+    ...Repositories,
+    ...MongoRepositories,
     JwtService,
     EmailManager,
     AppService,
     PaginationService,
     UsersService,
-    UsersRepository,
-    UsersQueryRepository,
-    BlogsQueryRepository,
-    BlogsRepository,
     BlogsService,
     PostsService,
-    PostsRepository,
-    PostsQueryRepository,
-    CommentsQueryRepository,
     UserLoginOrEmailExistsConstraint,
     IsBlogIdExistsConstraint,
     AuthService,
-    AuthRepository,
-    CommentsRepository,
-    SecurityQueryRepository,
     ...CommandHandlers,
   ],
 })

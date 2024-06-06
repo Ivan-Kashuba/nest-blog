@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ValidateObjectIdPipe } from '../../../infrastructure/pipes/object-id.pipe';
 import { Types } from 'mongoose';
-import { CommentsQueryRepository } from '../infrastructure/comments.query.repository';
+import { CommentsMongoQueryRepository } from '../infrastructure/comments-mongo-query.repository';
 import { CommentOutputModel } from './models/output/comment.output.model';
 import { CommentInputModel } from './models/input/create-comment.input.model';
 import { CommandBus } from '@nestjs/cqrs';
@@ -26,7 +26,7 @@ import { LikeInputModel } from '../../likes/api/models/input/like.input.model';
 @Controller('comments')
 export class CommentsController {
   constructor(
-    private commentsQueryRepository: CommentsQueryRepository,
+    private commentsQueryRepository: CommentsMongoQueryRepository,
     private commandBus: CommandBus,
   ) {}
 

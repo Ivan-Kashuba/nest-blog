@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 
 @Injectable()
-export class BlogsRepository {
+export class BlogsMongoRepository {
   constructor(@InjectModel(Blog.name) private BlogModel: TBlogModel) {}
 
   async findBlogById(blogId: Types.ObjectId) {

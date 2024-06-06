@@ -9,7 +9,7 @@ import {
 } from '../domain/Comment.entity';
 
 @Injectable()
-export class CommentsRepository {
+export class CommentsMongoRepository {
   constructor(
     @InjectModel(Comment.name) private CommentModel: TCommentModel,
     private readonly paginationService: PaginationService,

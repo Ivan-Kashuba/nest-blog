@@ -13,7 +13,7 @@ import { Post, TPostModel } from '../domain/Post.entity';
 import { PostOutputModel } from '../api/models/output/post.output.model';
 
 @Injectable()
-export class PostsQueryRepository {
+export class PostsMongoQueryRepository {
   constructor(
     @InjectModel(Post.name) private PostModel: TPostModel,
     private readonly paginationService: PaginationService,

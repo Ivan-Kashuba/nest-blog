@@ -9,7 +9,6 @@ import { HttpExceptionFilter } from '../infrastructure/exception-filters/http-ex
 import { AppModule } from '../app/app.module';
 import { useContainer } from 'class-validator';
 import cookieParser from 'cookie-parser';
-import { UserInfoFromTokenIfExists } from '../infrastructure/middlewares/get-info-from-token-if-exists';
 
 const APP_PREFIX = '';
 
