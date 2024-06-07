@@ -1,3 +1,5 @@
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import config, { EnvVariables } from '../config/env-config';
 import { MiddlewareConsumer, Module, Provider } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -29,8 +31,6 @@ import {
 } from '../features/likes/domain/ExtendedLikes.entity';
 import { CommentsController } from '../features/comments/api/comments.contoller';
 import { PostsMongoQueryRepository } from '../features/posts/infrastructure/posts-mongo-query.repository';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import config, { envConfig, EnvVariables } from '../config/env-config';
 import { UserLoginOrEmailExistsConstraint } from '../infrastructure/decorators/validation/is-user-login-available';
 import { AuthController } from '../features/auth/api/auth.contoller';
 import { JwtService } from '../application/jwt.service';
@@ -83,22 +83,17 @@ const Controllers = [
 
 const Repositories = repositoriesList.map((repo) => {
   return {
+    inject: [ConfigService],
     provide: repo.name,
     useFactory: (configService: ConfigService) => {
-      console.log('configService:', configService);
       const repositoryProviderName = configService.get<RepositoryVariant>(
         EnvVariables.REPOSITORY,
       );
 
-      console.log('repositoryProviderName:', repositoryProviderName);
-
-      return repo[repositoryProviderName!];
+      return repo.providers[repositoryProviderName!];
     },
-    inject: [ConfigService],
   };
 });
-
-// console.log('Repositories:', Repositories);
 
 const MongoRepositories: Provider[] = [
   UsersMongoQueryRepository,
@@ -115,6 +110,7 @@ const MongoRepositories: Provider[] = [
 @Module({
   imports: [
     ConfigModule.forRoot({
+      isGlobal: true,
       load: [config],
     }),
     ThrottlerModule.forRoot([
@@ -125,8 +121,7 @@ const MongoRepositories: Provider[] = [
     ]),
     CqrsModule,
     MailerModule.forRootAsync({
-      imports: [ConfigModule], // Make sure ConfigService is available
-      inject: [ConfigService], // Inject ConfigService to use it in factory
+      inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         defaults: {
           from: 'Blog <blog.kashuba.sender@gmail.com>',
@@ -141,8 +136,12 @@ const MongoRepositories: Provider[] = [
         },
       }),
     }),
-    MongooseModule.forRoot(envConfig.MONGO_URI, {
-      dbName: envConfig.DB_NAME,
+    MongooseModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        dbName: config.get(EnvVariables.DB_NAME),
+        uri: config.get(EnvVariables.MONGO_URI),
+      }),
     }),
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
@@ -156,8 +155,6 @@ const MongoRepositories: Provider[] = [
   ],
   controllers: [...Controllers],
   providers: [
-    ...Repositories,
-    ...MongoRepositories,
     JwtService,
     EmailManager,
     AppService,
@@ -168,6 +165,8 @@ const MongoRepositories: Provider[] = [
     UserLoginOrEmailExistsConstraint,
     IsBlogIdExistsConstraint,
     AuthService,
+    ...Repositories,
+    ...MongoRepositories,
     ...CommandHandlers,
   ],
 })

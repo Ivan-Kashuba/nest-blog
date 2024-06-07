@@ -1,6 +1,4 @@
 import { UsersMongoRepository } from '../features/users/infrastructure/users-mongo.repository';
-import { UsersRowSqlRepository } from '../features/users/infrastructure/users-rowSql.repository';
-import { UsersRepository } from '../features/users/infrastructure/abstract-users.repository';
 
 export enum RepositoryVariant {
   Mongo = 'mongo',
@@ -14,7 +12,7 @@ export enum RepositoryName {
 export const repositoriesList = [
   {
     name: RepositoryName.UsersRepository,
-    provider: {
+    providers: {
       [RepositoryVariant.Mongo]: UsersMongoRepository,
       [RepositoryVariant.RowPostgres]: UsersMongoRepository,
     },

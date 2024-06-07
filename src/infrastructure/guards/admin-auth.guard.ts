@@ -6,16 +6,23 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { Request } from 'express';
-import { envConfig } from '../../config/env-config';
+import { ConfigService } from '@nestjs/config';
+import { EnvVariables } from '../../config/env-config';
 
 @Injectable()
 export class AdminAuthGuard implements CanActivate {
+  constructor(private configService: ConfigService) {}
+
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request: Request = context.switchToHttp().getRequest();
 
-    if (request.headers.authorization !== envConfig.ADMIN_AUTH_HEADER) {
+    const ADMIN_AUTH_HEADER = this.configService.get(
+      EnvVariables.ADMIN_AUTH_HEADER,
+    );
+
+    if (request.headers.authorization !== ADMIN_AUTH_HEADER) {
       throw new UnauthorizedException();
     }
 

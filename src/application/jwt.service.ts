@@ -2,15 +2,19 @@ import jwt, { SignOptions } from 'jsonwebtoken';
 import { MILLI_SECONDS_IN_SECOND } from '../shared/constants';
 import bcrypt from 'bcryptjs';
 import { Injectable } from '@nestjs/common';
-import { envConfig } from '../config/env-config';
 import { UserTokenInfo } from '../features/auth/types/auth.types';
+import { ConfigService } from '@nestjs/config';
+import { EnvVariables } from '../config/env-config';
 
 @Injectable()
 export class JwtService {
+  constructor(private configService: ConfigService) {}
   async createJwt(
     userInfo: UserTokenInfo,
     expiresIn: SignOptions['expiresIn'],
   ) {
+    const JWT_SECRET_KEY = this.configService.get(EnvVariables.JWT_SECRET_KEY);
+
     return jwt.sign(
       {
         userId: userInfo.userId,
@@ -18,7 +22,7 @@ export class JwtService {
         login: userInfo.login,
         deviceId: userInfo.deviceId,
       } as UserTokenInfo,
-      envConfig.JWT_SECRET_KEY,
+      JWT_SECRET_KEY,
       {
         expiresIn,
       },
@@ -26,11 +30,10 @@ export class JwtService {
   }
 
   async getUserInfoByToken(token: string) {
+    const JWT_SECRET_KEY = this.configService.get(EnvVariables.JWT_SECRET_KEY);
+
     try {
-      const result = jwt.verify(
-        token,
-        envConfig.JWT_SECRET_KEY,
-      ) as UserTokenInfo;
+      const result = jwt.verify(token, JWT_SECRET_KEY) as UserTokenInfo;
 
       return {
         userId: result.userId,

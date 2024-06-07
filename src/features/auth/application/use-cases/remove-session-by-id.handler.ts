@@ -62,11 +62,6 @@ export class RemoveSessionByIdHandler
       throw new NotFoundException();
     }
 
-    console.log('sessionToRemove.userId:', sessionToRemove.userId);
-    console.log('user.userId:', user.userId);
-    console.log('user:', user);
-    console.log('sessionToRemove:', sessionToRemove);
-
     const isSessionBelongToUser =
       sessionToRemove.userId.toString() === user.userId.toString();
 
@@ -74,9 +69,6 @@ export class RemoveSessionByIdHandler
       throw new ForbiddenException();
     }
 
-    await this.authRepository.removeUserSession(
-      // user.userId,
-      sessionToRemove._id,
-    );
+    await this.authRepository.removeUserSession(sessionToRemove._id);
   }
 }

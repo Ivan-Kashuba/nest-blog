@@ -1,5 +1,6 @@
-import * as process from 'process';
+import { config } from 'dotenv';
 import { getRepository } from './repository-config';
+config();
 
 export enum EnvVariables {
   MONGO_URI = 'MONGO_URI',
@@ -11,7 +12,7 @@ export enum EnvVariables {
   REPOSITORY = 'REPOSITORY',
 }
 
-export const envConfig: Record<EnvVariables, string> = {
+const envConfig: Record<EnvVariables, string> = {
   [EnvVariables.MONGO_URI]:
     process.env.MONGO_URI || 'mongodb://127.0.0.1:27017',
   [EnvVariables.PORT]: process.env.PORT || '8080',
@@ -23,6 +24,4 @@ export const envConfig: Record<EnvVariables, string> = {
   [EnvVariables.REPOSITORY]: getRepository(process.env.REPOSITORY),
 };
 
-export default () => ({
-  ...envConfig,
-});
+export default () => envConfig;

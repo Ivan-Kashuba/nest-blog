@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '../../../application/jwt.service';
 import { Types } from 'mongoose';
 import { UserTokenInfo } from '../types/auth.types';
@@ -16,10 +16,12 @@ import { EmailManager } from '../../../adapters/email.manager';
 import { InjectModel } from '@nestjs/mongoose';
 import { ResultService } from '../../../infrastructure/resultService/ResultService';
 import { UsersRepository } from '../../users/infrastructure/abstract-users.repository';
+import { RepositoryName } from '../../../config/repository-config';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @Inject(RepositoryName.UsersRepository)
     private readonly usersRepository: UsersRepository,
     private readonly authRepository: AuthMongoRepository,
     protected readonly jwtService: JwtService,

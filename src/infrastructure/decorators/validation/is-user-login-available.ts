@@ -6,17 +6,23 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { UsersRepository } from '../../../features/users/infrastructure/abstract-users.repository';
+import { RepositoryName } from '../../../config/repository-config';
 
 @ValidatorConstraint({ name: 'IsUserLoginOrEmailUnused', async: true })
 @Injectable()
 export class UserLoginOrEmailExistsConstraint
   implements ValidatorConstraintInterface
 {
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(
+    @Inject(RepositoryName.UsersRepository)
+    private readonly usersRepository: UsersRepository,
+  ) {}
   async validate(value: string, args: ValidationArguments) {
     const shouldExist = args.constraints[0];
+
+    console.log('this.usersRepository:', this.usersRepository);
 
     const isValueOccupied =
       await this.usersRepository.findUserByLoginOrEmail(value);
