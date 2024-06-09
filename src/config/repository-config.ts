@@ -1,4 +1,5 @@
 import { UsersMongoRepository } from '../features/users/infrastructure/users-mongo.repository';
+import { UsersRowSqlRepository } from '../features/users/infrastructure/users-rowSql.repository';
 
 export enum RepositoryVariant {
   Mongo = 'mongo',
@@ -14,21 +15,24 @@ export const repositoriesList = [
     name: RepositoryName.UsersRepository,
     providers: {
       [RepositoryVariant.Mongo]: UsersMongoRepository,
-      [RepositoryVariant.RowPostgres]: UsersMongoRepository,
+      [RepositoryVariant.RowPostgres]: UsersRowSqlRepository,
     },
   },
 ];
 
-export const getRepository = (envRepositoryValue?: string) => {
+export const getRepository = (envRepositoryValue?: RepositoryVariant) => {
   const defaultRepository = RepositoryVariant.Mongo;
 
   if (!envRepositoryValue) {
     return defaultRepository;
   }
 
-  if (!RepositoryVariant[envRepositoryValue]) {
+  const isEnvValuesValid =
+    Object.values(RepositoryVariant).includes(envRepositoryValue);
+
+  if (!isEnvValuesValid) {
     return defaultRepository;
   }
 
-  return RepositoryVariant[envRepositoryValue];
+  return envRepositoryValue;
 };

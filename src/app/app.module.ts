@@ -1,5 +1,5 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import config, { EnvVariables } from '../config/env-config';
+import config, { envConfig, EnvVariables } from '../config/env-config';
 import { MiddlewareConsumer, Module, Provider } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -82,16 +82,11 @@ const Controllers = [
 ];
 
 const Repositories = repositoriesList.map((repo) => {
-  return {
-    inject: [ConfigService],
-    provide: repo.name,
-    useFactory: (configService: ConfigService) => {
-      const repositoryProviderName = configService.get<RepositoryVariant>(
-        EnvVariables.REPOSITORY,
-      );
+  const repositoryProviderName = envConfig.REPOSITORY as RepositoryVariant;
 
-      return repo.providers[repositoryProviderName!];
-    },
+  return {
+    provide: repo.name,
+    useClass: repo.providers[repositoryProviderName!],
   };
 });
 
