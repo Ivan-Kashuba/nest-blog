@@ -1,8 +1,6 @@
 import { HydratedDocument, Model, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { UserCreateModel } from '../api/models/input/create-user.input.model';
-import bcrypt from 'bcryptjs';
-import { UsersRepository } from '../infrastructure/abstract-users.repository';
 
 @Schema({ _id: false, timestamps: { createdAt: true } })
 export class UserAccountData {
@@ -46,21 +44,12 @@ export class User {
   passwordRecovery: UserPasswordRecovery;
 
   static async createUser(
-    usersRepository: UsersRepository,
     userPayload: UserCreateModel,
+    salt: string,
+    hash: string,
   ): Promise<TUserDocument | null> {
     const that = this as unknown as TUserModel;
-    const { login, password, email } = userPayload;
-
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(password, salt);
-
-    const isLoginExists = await usersRepository.findUserByLoginOrEmail(login);
-    const isEmailExists = await usersRepository.findUserByLoginOrEmail(email);
-
-    if (isLoginExists || isEmailExists) {
-      throw new Error('User credentials are already in use');
-    }
+    const { login, email } = userPayload;
 
     const userToSave: User = {
       _id: new Types.ObjectId(),

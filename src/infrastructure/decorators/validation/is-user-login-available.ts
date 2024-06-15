@@ -22,8 +22,6 @@ export class UserLoginOrEmailExistsConstraint
   async validate(value: string, args: ValidationArguments) {
     const shouldExist = args.constraints[0];
 
-    console.log('this.usersRepository:', this.usersRepository);
-
     const isValueOccupied =
       await this.usersRepository.findUserByLoginOrEmail(value);
 

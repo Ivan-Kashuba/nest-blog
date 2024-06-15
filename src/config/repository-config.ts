@@ -1,5 +1,7 @@
 import { UsersMongoRepository } from '../features/users/infrastructure/users-mongo.repository';
 import { UsersRowSqlRepository } from '../features/users/infrastructure/users-rowSql.repository';
+import { UsersQueryRowSqlRepository } from '../features/users/infrastructure/users-query-rowSql.repository';
+import { UsersQueryMongoRepository } from '../features/users/infrastructure/users-query-mongo.repository';
 
 export enum RepositoryVariant {
   Mongo = 'mongo',
@@ -8,6 +10,7 @@ export enum RepositoryVariant {
 
 export enum RepositoryName {
   UsersRepository = 'UsersRepository',
+  UsersQueryRepository = 'UsersQueryRepository',
 }
 
 export const repositoriesList = [
@@ -16,6 +19,13 @@ export const repositoriesList = [
     providers: {
       [RepositoryVariant.Mongo]: UsersMongoRepository,
       [RepositoryVariant.RowPostgres]: UsersRowSqlRepository,
+    },
+  },
+  {
+    name: RepositoryName.UsersQueryRepository,
+    providers: {
+      [RepositoryVariant.Mongo]: UsersQueryMongoRepository,
+      [RepositoryVariant.RowPostgres]: UsersQueryRowSqlRepository,
     },
   },
 ];

@@ -7,7 +7,7 @@ import { UsersController } from '../features/users/api/users.contoller';
 import { UsersService } from '../features/users/application/users.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from '../features/users/domain/User.entity';
-import { UsersMongoQueryRepository } from '../features/users/infrastructure/users-mongo-query.repository';
+import { UsersQueryMongoRepository } from '../features/users/infrastructure/users-query-mongo.repository';
 import { PaginationService } from '../infrastructure/pagination/service/pagination.service';
 import { TestingController } from '../features/testing/api/testing.controller';
 import { BlogsController } from '../features/blogs/api/blogs.contoller';
@@ -58,6 +58,7 @@ import {
   repositoriesList,
   RepositoryVariant,
 } from '../config/repository-config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 const CommandHandlers = [
   UpdateCommentHandler,
@@ -91,7 +92,7 @@ const Repositories = repositoriesList.map((repo) => {
 });
 
 const MongoRepositories: Provider[] = [
-  UsersMongoQueryRepository,
+  UsersQueryMongoRepository,
   BlogsMongoQueryRepository,
   BlogsMongoRepository,
   PostsMongoRepository,
@@ -107,6 +108,16 @@ const MongoRepositories: Provider[] = [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [config],
+    }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: '123',
+      database: 'Blog',
+      autoLoadEntities: false,
+      synchronize: false,
     }),
     ThrottlerModule.forRoot([
       {

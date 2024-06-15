@@ -3,6 +3,7 @@ import { TUserDocument, TUserModel, User } from '../domain/User.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import { UsersRepository } from './abstract-users.repository';
+import { UserCreateModel } from '../api/models/input/create-user.input.model';
 
 @Injectable()
 export class UsersMongoRepository implements UsersRepository {
@@ -19,8 +20,26 @@ export class UsersMongoRepository implements UsersRepository {
     });
   }
 
-  async findUserById(userId: Types.ObjectId): Promise<TUserDocument | null> {
-    return this.UserModel.findOne({ _id: userId });
+  async createUser(
+    userPayload: UserCreateModel,
+    salt: string,
+    hash: string,
+  ): Promise<Types.ObjectId> {
+    const user: TUserDocument | null = await this.UserModel.createUser(
+      userPayload,
+      salt,
+      hash,
+    );
+
+    if (user) {
+      await this.save(user);
+    }
+
+    return user!._id;
+  }
+
+  async findUserById(userId: string): Promise<TUserDocument | null> {
+    return this.UserModel.findOne({ _id: new Types.ObjectId(userId) });
   }
 
   async findUserByRegistrationActivationCode(

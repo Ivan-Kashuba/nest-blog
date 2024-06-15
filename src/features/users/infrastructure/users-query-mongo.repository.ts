@@ -3,10 +3,15 @@ import { TUserDocument, TUserModel, User } from '../domain/User.entity';
 import { PaginationPayload } from '../../../infrastructure/pagination/types/pagination.types';
 import { InjectModel } from '@nestjs/mongoose';
 import { PaginationService } from '../../../infrastructure/pagination/service/pagination.service';
-import { UserOutputModel } from '../api/models/output/user.output.model';
+import {
+  UserOutputModel,
+  UserOutputModelMapper,
+} from '../api/models/output/user.output.model';
+import { Types } from 'mongoose';
+import { UsersQueryRepository } from './abstract-users-query.repository';
 
 @Injectable()
-export class UsersMongoQueryRepository {
+export class UsersQueryMongoRepository implements UsersQueryRepository {
   constructor(
     @InjectModel(User.name) private UserModel: TUserModel,
     private readonly paginationService: PaginationService,
@@ -58,18 +63,15 @@ export class UsersMongoQueryRepository {
     );
   }
 
-  _mapDbUserToViewUser(dbUser: User | TUserDocument) {
-    const viewUser: UserOutputModel = {
-      id: dbUser._id!.toString(),
-      createdAt: dbUser.accountData.createdAt,
-      email: dbUser.accountData.email,
-      login: dbUser.accountData.login,
-    };
+  async findUserById(id: string): Promise<UserOutputModel | null> {
+    const user: TUserDocument | null = await this.UserModel.findOne({
+      _id: new Types.ObjectId(id),
+    });
 
-    return viewUser;
+    return user ? UserOutputModelMapper(user) : null;
   }
 
   _mapDbUsersToViewUsers(dbUsers: User[]) {
-    return dbUsers.map(this._mapDbUserToViewUser);
+    return dbUsers.map(UserOutputModelMapper);
   }
 }
