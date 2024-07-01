@@ -23,8 +23,12 @@ export class AppController {
       search?: string;
     },
   ) {
-    return await this.usersRowSqlRepository.findUserByLoginOrEmail(
-      queryParams.search || '',
+    await this.usersRowSqlRepository.updateUserPassword(
+      '57c31731-1db8-45b4-bdba-f7e6b2901403',
+      'SALT123',
+      'HASH-1',
     );
+
+    return 'OK';
   }
 }

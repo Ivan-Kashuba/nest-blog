@@ -1,4 +1,4 @@
-import { TUserDocument, User } from '../domain/User.entity';
+import { TUserDocument } from '../domain/User.entity';
 import { Types } from 'mongoose';
 import { UserCreateModel } from '../api/models/input/create-user.input.model';
 
@@ -17,10 +17,19 @@ export interface UsersRepository {
     code: string,
   ): Promise<TUserDocument | null>;
 
-  updateUserByLoginOrEmail(
-    loginOrEmail: string,
-    updateInfo: Partial<User>,
-  ): Promise<TUserDocument | null>;
+  confirmUserAccountById(id: string | Types.ObjectId): Promise<void>;
+
+  createPasswordRecoveryCode(
+    userId: string | Types.ObjectId,
+    code: string,
+    expirationDate: string,
+  ): Promise<void>;
+
+  updateUserPassword(
+    userId: string | Types.ObjectId,
+    salt: string,
+    hash: string,
+  ): Promise<void>;
 
   deleteUser(userId: string): Promise<boolean>;
 

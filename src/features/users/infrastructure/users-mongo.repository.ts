@@ -50,16 +50,49 @@ export class UsersMongoRepository implements UsersRepository {
     });
   }
 
-  async updateUserByLoginOrEmail(
-    loginOrEmail: string,
+  async confirmUserAccountById(id: Types.ObjectId): Promise<void> {
+    return (await this._updateUserById(id, {
+      accountConfirmation: {
+        isConfirmed: true,
+        confirmationCode: null,
+        expirationDate: null,
+      },
+    })) as any;
+  }
+
+  async createPasswordRecoveryCode(
+    userId: Types.ObjectId,
+    code: string,
+    expirationDate: string,
+  ): Promise<void> {
+    return (await this._updateUserById(userId, {
+      passwordRecovery: {
+        confirmationCode: code,
+        expirationDate,
+      },
+    })) as any;
+  }
+
+  async updateUserPassword(
+    userId: Types.ObjectId,
+    salt: string,
+    hash: string,
+  ): Promise<void> {
+    return (await this._updateUserById(userId, {
+      accountData: {
+        salt,
+        hash,
+      } as any,
+    })) as any;
+  }
+
+  async _updateUserById(
+    id: Types.ObjectId,
     updateInfo: Partial<User>,
   ): Promise<TUserDocument | null> {
     return this.UserModel.findOneAndUpdate(
       {
-        $or: [
-          { 'accountData.login': loginOrEmail },
-          { 'accountData.email': loginOrEmail },
-        ],
+        _id: id,
       },
       {
         $set: {

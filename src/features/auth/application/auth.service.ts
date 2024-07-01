@@ -145,14 +145,7 @@ export class AuthService {
       );
     }
 
-    await this.usersRepository.updateUserByLoginOrEmail(
-      userToConfirm!.accountData!.email,
-      {
-        'accountConfirmation.isConfirmed': true,
-        'accountConfirmation.confirmationCode': null,
-        'accountConfirmation.expirationDate': null,
-      } as any,
-    );
+    await this.usersRepository.confirmUserAccountById(userToConfirm._id);
   }
 
   async refreshToken(refreshToken: string) {
@@ -245,12 +238,11 @@ export class AuthService {
       return true;
     }
 
-    await this.usersRepository.updateUserByLoginOrEmail(email, {
-      passwordRecovery: {
-        confirmationCode,
-        expirationDate: add(new Date(), { hours: 24 }).toISOString(),
-      },
-    });
+    await this.usersRepository.createPasswordRecoveryCode(
+      user._id,
+      confirmationCode,
+      add(new Date(), { hours: 24 }).toISOString(),
+    );
 
     this.emailManager
       .sendPasswordRecoveryEmail(email, confirmationCode)
@@ -273,19 +265,10 @@ export class AuthService {
 
     const salt = this.jwtService.createSalt(10);
 
-    await this.usersRepository.updateUserByLoginOrEmail(
-      user.accountData.login,
-      {
-        accountData: {
-          ...user.accountData,
-          salt: salt,
-          hash: this.jwtService.createHash(newPassword, salt),
-        },
-        passwordRecovery: {
-          confirmationCode: null,
-          expirationDate: null,
-        },
-      },
+    await this.usersRepository.updateUserPassword(
+      user._id,
+      salt,
+      this.jwtService.createHash(newPassword, salt),
     );
   }
 
