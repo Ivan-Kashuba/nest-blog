@@ -39,7 +39,7 @@ export class AuthMongoRepository implements AuthRepository {
     sessionId: Types.ObjectId,
     lastActiveDate: string,
   ): Promise<void> {
-    this.SessionModel.findOneAndUpdate(
+    await this.SessionModel.findOneAndUpdate(
       { _id: sessionId },
       { $set: { lastActiveDate } },
     );

@@ -15,8 +15,13 @@ import { EmailManager } from '../../../adapters/email.manager';
 import { InjectModel } from '@nestjs/mongoose';
 import { ResultService } from '../../../infrastructure/resultService/ResultService';
 import { UsersRepository } from '../../users/infrastructure/abstract-users.repository';
-import { RepositoryName } from '../../../config/repository-config';
+import {
+  RepositoryName,
+  RepositoryVariant,
+} from '../../../config/repository-config';
 import { AuthRepository } from '../infrastructure/abstract-auth.repository';
+import { ConfigService } from '@nestjs/config';
+import { EnvVariables } from '../../../config/env-config';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +33,7 @@ export class AuthService {
     protected readonly jwtService: JwtService,
     protected readonly emailManager: EmailManager,
     @InjectModel(User.name) private UserModel: TUserModel,
+    protected readonly configService: ConfigService,
   ) {}
 
   async loginByLoginOrEmail(
@@ -50,7 +56,11 @@ export class AuthService {
     )
       return null;
 
-    const deviceId = new Types.ObjectId();
+    const deviceId =
+      this.configService.get(EnvVariables.REPOSITORY) ===
+      RepositoryVariant.Mongo
+        ? new Types.ObjectId()
+        : uuidv4();
 
     const userInfo: UserTokenInfo = {
       userId: userByLoginOrEmail._id,
@@ -69,7 +79,7 @@ export class AuthService {
       userId: userByLoginOrEmail._id,
       ip: userIp,
       title: userDeviceName,
-      deviceId: deviceId,
+      deviceId: deviceId as any,
       lastActiveDate: expirationTokenDate!,
     });
 
@@ -279,8 +289,8 @@ export class AuthService {
   }
 
   async createJwtKeys(userInfo: UserTokenInfo) {
-    const accessToken = await this.jwtService.createJwt(userInfo, '6m');
-    const refreshToken = await this.jwtService.createJwt(userInfo, '30d');
+    const accessToken = await this.jwtService.createJwt(userInfo, '10s');
+    const refreshToken = await this.jwtService.createJwt(userInfo, '20s');
 
     return {
       accessToken,
