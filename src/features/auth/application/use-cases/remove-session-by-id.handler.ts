@@ -4,12 +4,14 @@ import { plainToClass } from 'class-transformer';
 import { JwtService } from '../../../../application/jwt.service';
 import {
   ForbiddenException,
+  Inject,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from '../auth.service';
-import { AuthMongoRepository } from '../../infrastructure/auth-mongo.repository';
 import { Types } from 'mongoose';
+import { RepositoryName } from '../../../../config/repository-config';
+import { AuthRepository } from '../../infrastructure/abstract-auth.repository';
 
 export class RemoveSessionByIdCommand {
   @IsNotEmpty()
@@ -29,7 +31,8 @@ export class RemoveSessionByIdHandler
   constructor(
     private jwtService: JwtService,
     private authService: AuthService,
-    private authRepository: AuthMongoRepository,
+    @Inject(RepositoryName.AuthRepository)
+    private readonly authRepository: AuthRepository,
   ) {}
 
   async execute(command: RemoveSessionByIdCommand) {

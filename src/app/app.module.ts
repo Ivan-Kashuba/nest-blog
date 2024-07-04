@@ -34,7 +34,6 @@ import { PostsMongoQueryRepository } from '../features/posts/infrastructure/post
 import { UserLoginOrEmailExistsConstraint } from '../infrastructure/decorators/validation/is-user-login-available';
 import { AuthController } from '../features/auth/api/auth.contoller';
 import { JwtService } from '../application/jwt.service';
-import { AuthService } from '../features/auth/application/auth.service';
 import { Session, SessionSchema } from '../features/auth/domain/Session.entity';
 import { AuthMongoRepository } from '../features/auth/infrastructure/auth-mongo.repository';
 import { UserInfoFromTokenIfExists } from '../infrastructure/middlewares/get-info-from-token-if-exists';
@@ -59,6 +58,7 @@ import {
   RepositoryVariant,
 } from '../config/repository-config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthService } from '../features/auth/application/auth.service';
 
 const CommandHandlers = [
   UpdateCommentHandler,
@@ -98,7 +98,6 @@ const MongoRepositories: Provider[] = [
   PostsMongoRepository,
   PostsMongoQueryRepository,
   CommentsMongoQueryRepository,
-  AuthMongoRepository,
   CommentsMongoRepository,
   SecurityMongoQueryRepository,
 ];

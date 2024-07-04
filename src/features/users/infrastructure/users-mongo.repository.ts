@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { TUserDocument, TUserModel, User } from '../domain/User.entity';
+import {
+  TUserDocument,
+  TUserModel,
+  User,
+  UserAccountConfirmation,
+} from '../domain/User.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import { UsersRepository } from './abstract-users.repository';
@@ -114,6 +119,23 @@ export class UsersMongoRepository implements UsersRepository {
     return this.UserModel.findOne({
       'passwordRecovery.confirmationCode': code,
     }).lean();
+  }
+
+  async registerUser(user: TUserDocument): Promise<Types.ObjectId> {
+    await this.save(user);
+
+    return user._id;
+  }
+
+  async updateUserAccountConfirmation(
+    userId: string,
+    accountConfirmationInfo: UserAccountConfirmation,
+  ): Promise<void> {
+    const user = await this.findUserById(userId);
+
+    user!.accountConfirmation = accountConfirmationInfo;
+
+    await this.save(user!);
   }
 
   async save(user: TUserDocument) {

@@ -7,7 +7,6 @@ import {
   Param,
   UnauthorizedException,
 } from '@nestjs/common';
-import { User } from '../../../infrastructure/decorators/transform/get-user';
 import { Cookies } from '../../../infrastructure/decorators/transform/cookies';
 import { CommandBus } from '@nestjs/cqrs';
 import { GetSessionDevicesCommand } from '../application/use-cases/get-session-devices.handler';

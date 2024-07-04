@@ -1,18 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { TUserDocument, TUserModel, User } from '../domain/User.entity';
-import { InjectModel } from '@nestjs/mongoose';
+import {
+  TUserDocument,
+  User,
+  UserAccountConfirmation,
+} from '../domain/User.entity';
 import { UsersRepository } from './abstract-users.repository';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { UserCreateModel } from '../api/models/input/create-user.input.model';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class UsersRowSqlRepository implements UsersRepository {
-  constructor(
-    @InjectModel(User.name) private UserModel: TUserModel,
-    @InjectDataSource() protected dataSource: DataSource,
-  ) {}
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async _getUserByCondition(queryString: string) {
     const foundUser = (
@@ -85,6 +86,15 @@ export class UsersRowSqlRepository implements UsersRepository {
       )
     )[0];
 
+    await this.dataSource.query(
+      `
+    INSERT INTO public."UsersConfirmation"(
+"userId", "isConfirmed")
+VALUES ($1,$2)
+    `,
+      [user._id, true],
+    );
+
     return user._id;
   }
 
@@ -156,6 +166,61 @@ export class UsersRowSqlRepository implements UsersRepository {
   ): Promise<TUserDocument | null> {
     return await this._getUserByCondition(
       `WHERE upr."confirmationCode" = '${code}'`,
+    );
+  }
+
+  async registerUser(user: TUserDocument): Promise<Types.ObjectId | string> {
+    const {
+      accountData: { createdAt, hash, email, login, salt },
+      accountConfirmation: { confirmationCode, isConfirmed, expirationDate },
+      passwordRecovery: {
+        confirmationCode: recoveryCode,
+        expirationDate: recoveryExpirationDate,
+      },
+    } = user;
+
+    const userId = uuidv4();
+
+    await this.dataSource.transaction(async (manager) => {
+      await manager.query(
+        `INSERT INTO public."Users"(
+        _id, "createdAt", login, email, salt, hash)
+        VALUES ($1, $2, $3, $4, $5, $6);`,
+        [userId, createdAt, login, email, salt, hash],
+      );
+
+      await manager.query(
+        `INSERT INTO public."UsersConfirmation"(
+        "userId", "confirmationCode", "expirationDate", "isConfirmed")
+        VALUES ($1, $2, $3, $4);`,
+        [userId, confirmationCode, expirationDate, isConfirmed],
+      );
+
+      await manager.query(
+        `INSERT INTO public."UsersPasswordRecovery"(
+        "userId", "confirmationCode", "expirationDate")
+        VALUES ($1, $2, $3);`,
+        [userId, recoveryCode, recoveryExpirationDate],
+      );
+    });
+
+    return userId;
+  }
+
+  async updateUserAccountConfirmation(
+    userId: string,
+    accountConfirmationInfo: UserAccountConfirmation,
+  ): Promise<void> {
+    const { isConfirmed, confirmationCode, expirationDate } =
+      accountConfirmationInfo;
+
+    return await this.dataSource.query(
+      `
+    UPDATE public."UsersConfirmation" u
+    SET "isConfirmed"=$2, "confirmationCode"=$3, "expirationDate"=$4
+    WHERE u."userId"=$1
+    `,
+      [userId, isConfirmed, confirmationCode, expirationDate],
     );
   }
 

@@ -2,9 +2,10 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { IsNotEmpty, validateOrReject } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 import { JwtService } from '../../../../application/jwt.service';
-import { UnauthorizedException } from '@nestjs/common';
+import { Inject, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../auth.service';
-import { AuthMongoRepository } from '../../infrastructure/auth-mongo.repository';
+import { RepositoryName } from '../../../../config/repository-config';
+import { AuthRepository } from '../../infrastructure/abstract-auth.repository';
 
 export class RemoveAllButCurrentSessionCommand {
   @IsNotEmpty()
@@ -22,7 +23,8 @@ export class RemoveAllButCurrentSessionHandler
   constructor(
     private jwtService: JwtService,
     private authService: AuthService,
-    private authRepository: AuthMongoRepository,
+    @Inject(RepositoryName.AuthRepository)
+    private authRepository: AuthRepository,
   ) {}
 
   async execute(command: RemoveAllButCurrentSessionCommand) {

@@ -3,7 +3,6 @@ import { JwtService } from '../../../application/jwt.service';
 import { Types } from 'mongoose';
 import { UserTokenInfo } from '../types/auth.types';
 import { LoginInputModel } from '../api/models/input/login.input.model';
-import { AuthMongoRepository } from '../infrastructure/auth-mongo.repository';
 import { add, isBefore } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -17,13 +16,15 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ResultService } from '../../../infrastructure/resultService/ResultService';
 import { UsersRepository } from '../../users/infrastructure/abstract-users.repository';
 import { RepositoryName } from '../../../config/repository-config';
+import { AuthRepository } from '../infrastructure/abstract-auth.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
     @Inject(RepositoryName.UsersRepository)
     private readonly usersRepository: UsersRepository,
-    private readonly authRepository: AuthMongoRepository,
+    @Inject(RepositoryName.AuthRepository)
+    private readonly authRepository: AuthRepository,
     protected readonly jwtService: JwtService,
     protected readonly emailManager: EmailManager,
     @InjectModel(User.name) private UserModel: TUserModel,
@@ -100,13 +101,14 @@ export class AuthService {
         confirmationCode: null,
       },
     });
-    await this.usersRepository.save(userInDb);
+
+    const userId = await this.usersRepository.registerUser(userInDb);
 
     this.emailManager
       .sendRegistrationConfirmEmail(userInfo.email, confirmationCode)
       .catch((err) => console.log('Email error' + err));
 
-    return userInDb._id;
+    return userId;
   }
 
   async resendRegistrationCode(userEmail: string) {
@@ -126,7 +128,10 @@ export class AuthService {
       expirationDate: add(new Date(), { hours: 24 }).toISOString(),
     };
 
-    await this.usersRepository.save(user);
+    await this.usersRepository.updateUserAccountConfirmation(
+      user._id,
+      user.accountConfirmation,
+    );
 
     this.emailManager
       .sendRegistrationConfirmEmail(userEmail, confirmationCode)
@@ -205,9 +210,10 @@ export class AuthService {
     const expirationTokenDate =
       await this.jwtService.getJwtExpirationDate(refreshToken);
 
-    return await this.authRepository.updateUserDeviceSession(sessionId, {
-      lastActiveDate: expirationTokenDate!,
-    });
+    return await this.authRepository.updateUserSessionLastActiveDate(
+      sessionId,
+      expirationTokenDate!,
+    );
   }
 
   async logout(refreshToken: string) {

@@ -1,14 +1,14 @@
 import { Controller, Get, Inject, Query } from '@nestjs/common';
 import { AppService } from './app.service';
 import { RepositoryName } from '../config/repository-config';
-import { UsersRowSqlRepository } from '../features/users/infrastructure/users-rowSql.repository';
+import { SecurityQueryRepository } from '../features/auth/infrastructure/abstract-security-query.repository';
 
 @Controller()
 export class AppController {
   constructor(
     private readonly appService: AppService,
-    @Inject(RepositoryName.UsersRepository)
-    private readonly usersRowSqlRepository: UsersRowSqlRepository,
+    @Inject(RepositoryName.SecurityQueryRepository)
+    private readonly securityQueryRepository: SecurityQueryRepository,
   ) {}
 
   @Get()
@@ -23,12 +23,8 @@ export class AppController {
       search?: string;
     },
   ) {
-    await this.usersRowSqlRepository.updateUserPassword(
-      '57c31731-1db8-45b4-bdba-f7e6b2901403',
-      'SALT123',
-      'HASH-1',
+    return await this.securityQueryRepository.getUserSessionsListById(
+      '268511d3-4f5c-4444-b432-c2aa6659076c',
     );
-
-    return 'OK';
   }
 }
