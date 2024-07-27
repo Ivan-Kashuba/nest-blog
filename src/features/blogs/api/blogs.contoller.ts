@@ -1,49 +1,27 @@
 import {
-  Body,
   Controller,
-  Delete,
   Get,
-  HttpCode,
-  HttpStatus,
   NotFoundException,
   Param,
-  Post,
-  Put,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import {
   PaginationPayload,
   WithPagination,
 } from '../../../infrastructure/pagination/types/pagination.types';
 import { PaginationService } from '../../../infrastructure/pagination/service/pagination.service';
-import {
-  BlogOutputModel,
-  BlogOutputModelMapper,
-} from './models/output/blog.output.model';
+import { BlogOutputModel } from './models/output/blog.output.model';
 import { BlogsMongoQueryRepository } from '../infrastructure/blogs-mongo-query.repository';
-import { BlogInputModel } from './models/input/create-blog.input.model';
-import { BlogsService } from '../application/blogs.service';
 import { ValidateObjectIdPipe } from '../../../infrastructure/pipes/object-id.pipe';
 import { PostOutputModel } from '../../posts/api/models/output/post.output.model';
 import { Types } from 'mongoose';
-import { PostsService } from '../../posts/application/posts.service';
-import { BlogsMongoRepository } from '../infrastructure/blogs-mongo.repository';
-import { PostsMongoQueryRepository } from '../../posts/infrastructure/posts-mongo-query.repository';
-import { Blog } from '../domain/Blog.entity';
-import { AdminAuthGuard } from '../../../infrastructure/guards/admin-auth.guard';
 import { User } from '../../../infrastructure/decorators/transform/get-user';
-import { PostForBlogInputModel } from './models/input/create-post-for-blog.input.model';
 
 @Controller('blogs')
 export class BlogsController {
   constructor(
     private readonly paginationService: PaginationService,
     private readonly blogsQueryRepository: BlogsMongoQueryRepository,
-    private readonly blogsService: BlogsService,
-    private readonly postsService: PostsService,
-    private readonly postsQueryRepository: PostsMongoQueryRepository,
-    private readonly blogsRepository: BlogsMongoRepository,
   ) {}
 
   @Get()
@@ -60,40 +38,6 @@ export class BlogsController {
     );
 
     return await this.blogsQueryRepository.findBlogs(nameToFind, pagination);
-  }
-
-  @UseGuards(AdminAuthGuard)
-  @Post()
-  async createBlog(
-    @Body() blogInputData: BlogInputModel,
-  ): Promise<BlogOutputModel> {
-    const createdBlog: Blog = await this.blogsService.createBlog(blogInputData);
-
-    return BlogOutputModelMapper(createdBlog);
-  }
-
-  @UseGuards(AdminAuthGuard)
-  @Post(':blogId/posts')
-  async createPostForBlog(
-    @Param('blogId', ValidateObjectIdPipe) blogId: Types.ObjectId,
-    @Body()
-    postInputData: PostForBlogInputModel,
-  ): Promise<any> {
-    const blog = await this.blogsRepository.findBlogById(blogId);
-
-    if (!blog) {
-      throw new NotFoundException();
-    }
-
-    const createdPostId = await this.postsService.createPost({
-      ...postInputData,
-      blogId: blogId,
-    });
-
-    const viewPost =
-      await this.postsQueryRepository.findPostById(createdPostId);
-
-    return viewPost!;
   }
 
   @Get(':blogId')
@@ -131,33 +75,5 @@ export class BlogsController {
       pagination,
       userId,
     );
-  }
-
-  @UseGuards(AdminAuthGuard)
-  @Delete(':blogId')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteBlog(@Param('blogId', ValidateObjectIdPipe) blogId: string) {
-    const isBlogDeleted = await this.blogsService.deleteBlog(blogId);
-
-    if (!isBlogDeleted) {
-      throw new NotFoundException();
-    }
-  }
-
-  @UseGuards(AdminAuthGuard)
-  @Put(':blogId')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async updateBlog(
-    @Param('blogId', ValidateObjectIdPipe) blogId: Types.ObjectId,
-    @Body() updateInfo: BlogInputModel,
-  ) {
-    const isBlogUpdated = await this.blogsService.updateBlog(
-      blogId,
-      updateInfo,
-    );
-
-    if (!isBlogUpdated) {
-      throw new NotFoundException();
-    }
   }
 }

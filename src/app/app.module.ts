@@ -35,7 +35,6 @@ import { UserLoginOrEmailExistsConstraint } from '../infrastructure/decorators/v
 import { AuthController } from '../features/auth/api/auth.contoller';
 import { JwtService } from '../application/jwt.service';
 import { Session, SessionSchema } from '../features/auth/domain/Session.entity';
-import { AuthMongoRepository } from '../features/auth/infrastructure/auth-mongo.repository';
 import { UserInfoFromTokenIfExists } from '../infrastructure/middlewares/get-info-from-token-if-exists';
 import { EmailManager } from '../adapters/email.manager';
 import { MailerModule } from '@nestjs-modules/mailer';
@@ -59,6 +58,7 @@ import {
 } from '../config/repository-config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthService } from '../features/auth/application/auth.service';
+import { SaBlogsController } from '../features/blogs/api/sa.blogs.controller';
 
 const CommandHandlers = [
   UpdateCommentHandler,
@@ -76,6 +76,7 @@ const Controllers = [
   TestingController,
   UsersController,
   BlogsController,
+  SaBlogsController,
   PostsController,
   CommentsController,
   AuthController,

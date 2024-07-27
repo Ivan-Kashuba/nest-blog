@@ -33,7 +33,7 @@ export class CommentsMongoQueryRepository {
     const { pageNumber, pageSize, sortBy, sortDirection } = pagination;
 
     const dbComments = await this.CommentModel.find({
-      postId: new Types.ObjectId(postId),
+      postId: postId,
     })
       .sort({
         [sortBy]:

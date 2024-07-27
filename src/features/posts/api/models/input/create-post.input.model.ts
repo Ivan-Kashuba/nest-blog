@@ -17,3 +17,15 @@ export class PostInputModel {
   @IsBlogIdExists()
   blogId: Types.ObjectId;
 }
+
+export class PostEditForBlogInputModel {
+  @Trim()
+  @Length(1, 30)
+  title: string;
+  @Trim()
+  @Length(1, 100)
+  shortDescription: string;
+  @Trim()
+  @Length(1, 1000)
+  content: string;
+}

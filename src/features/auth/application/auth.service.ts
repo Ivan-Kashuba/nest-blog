@@ -289,8 +289,8 @@ export class AuthService {
   }
 
   async createJwtKeys(userInfo: UserTokenInfo) {
-    const accessToken = await this.jwtService.createJwt(userInfo, '10s');
-    const refreshToken = await this.jwtService.createJwt(userInfo, '20s');
+    const accessToken = await this.jwtService.createJwt(userInfo, '6m');
+    const refreshToken = await this.jwtService.createJwt(userInfo, '30d');
 
     return {
       accessToken,

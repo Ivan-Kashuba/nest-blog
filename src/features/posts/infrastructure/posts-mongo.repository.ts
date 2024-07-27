@@ -9,7 +9,7 @@ export class PostsMongoRepository {
   constructor(@InjectModel(Post.name) private PostModel: TPostModel) {}
 
   async findPostById(postId: Types.ObjectId) {
-    return this.PostModel.findOne({ _id: postId });
+    return this.PostModel.findOne({ _id: new Types.ObjectId(postId) });
   }
 
   async save(post: TPostDocument) {

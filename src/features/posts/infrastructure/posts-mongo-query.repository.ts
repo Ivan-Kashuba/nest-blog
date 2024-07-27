@@ -60,7 +60,7 @@ export class PostsMongoQueryRepository {
   async findPostById(postId: Types.ObjectId, userId?: Types.ObjectId) {
     const postWithDbExtendedLikesInfo = (
       await this.PostModel.aggregate(
-        this._getPostWithBlogNameAggregate({ _id: postId }),
+        this._getPostWithBlogNameAggregate({ _id: new Types.ObjectId(postId) }),
       )
     )[0] as unknown as PostModelAfterAggregation;
 
